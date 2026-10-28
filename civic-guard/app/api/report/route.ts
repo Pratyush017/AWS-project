@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Type } from "@google/genai";
 import { z } from "zod";
-import { createClient } from "@/utils/supabase/server";
+import { docClient, REPORTS_TABLE, PROFILES_TABLE } from "@/lib/dynamodb";
+import { PutCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
+import { getAuthenticatedUser } from "@/lib/server-auth";
 import { getGeminiClient, withGeminiRetry, parseGeminiError } from "@/lib/gemini";
 import { S3Client, DeleteObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 
@@ -70,11 +72,10 @@ function zodToGeminiSchema() {
 // ---------------------------------------------------------------------------
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = getAuthenticatedUser(request);
 
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized - please log in" }, { status: 401 });
     }
 
     // ---- Parse multipart form data ----
@@ -259,37 +260,48 @@ export async function POST(request: NextRequest) {
     };
     const mappedSeverity = severityMap[parsed.severity] || 3;
 
-    // ---- Insert into the reports table ----
-    const { data: report, error: insertError } = await supabase
-      .from("reports")
-      .insert({
-        title: parsed.title,
-        description: parsed.description,
-        category: parsed.category,
-        severity_score: mappedSeverity,
-        latitude: lat,
-        longitude: lng,
-        image_url: publicUrl,
-        status: "Reported",
-        user_id: user.id,
-      })
-      .select()
-      .single();
+    // ---- Insert into DynamoDB CivicPulseReports table ----
+    const report = {
+      id: crypto.randomUUID(),
+      title: parsed.title,
+      description: parsed.description,
+      category: parsed.category,
+      severity_score: mappedSeverity,
+      latitude: lat,
+      longitude: lng,
+      image_url: publicUrl,
+      status: "Reported",
+      user_id: user.id,
+      created_at: new Date().toISOString(),
+    };
 
-    if (insertError) {
-      console.error("Supabase insert error:", insertError);
+    try {
+      await docClient.send(
+        new PutCommand({
+          TableName: REPORTS_TABLE,
+          Item: report,
+        })
+      );
+    } catch (insertError) {
+      console.error("[DynamoDB] Insert error:", insertError);
       return NextResponse.json(
-        { error: "Failed to save report to database" },
+        { error: "Failed to save report to DynamoDB database" },
         { status: 500 }
       );
     }
 
-    // Give civic points securely
-    const { error: rpcError } = await supabase.rpc("increment_civic_points", {
-      points_to_add: 10,
-    });
-    if (rpcError) {
-      console.error("Failed to increment points:", rpcError);
+    // Give civic points securely in DynamoDB CivicPulseProfiles table
+    try {
+      await docClient.send(
+        new UpdateCommand({
+          TableName: PROFILES_TABLE,
+          Key: { id: user.id },
+          UpdateExpression: "ADD points :pts",
+          ExpressionAttributeValues: { ":pts": 10 },
+        })
+      );
+    } catch (ptsErr) {
+      console.warn("[DynamoDB] Failed to increment points:", ptsErr);
     }
 
     return NextResponse.json({ report }, { status: 201 });

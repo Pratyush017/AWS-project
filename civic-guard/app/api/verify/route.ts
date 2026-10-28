@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
+import { docClient, REPORTS_TABLE, PROFILES_TABLE } from "@/lib/dynamodb";
+import { GetCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
+import { getAuthenticatedUser } from "@/lib/server-auth";
 import { getGeminiClient, withGeminiRetry, parseGeminiError } from "@/lib/gemini";
 import type { ClassName } from "@/lib/classifier";
 import { S3Client, DeleteObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
@@ -60,13 +62,10 @@ function normalizeCategoryToClass(dbCategory: string): ClassName | "unknown" {
 // ---------------------------------------------------------------------------
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = getAuthenticatedUser(request);
 
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized - please log in" }, { status: 401 });
     }
 
     // ---- Parse multipart form data ----
@@ -104,19 +103,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // ---- Fetch the original report ----
-    const { data: report, error: fetchError } = await supabase
-      .from("reports")
-      .select("*")
-      .eq("id", reportId)
-      .single();
+    // ---- Fetch the original report from DynamoDB ----
+    const getReportRes = await docClient.send(
+      new GetCommand({
+        TableName: REPORTS_TABLE,
+        Key: { id: reportId },
+      })
+    );
+    const report = getReportRes.Item;
 
-    if (fetchError || !report) {
-      console.error("Failed to fetch report:", fetchError);
-      return NextResponse.json(
-        { error: "Report not found" },
-        { status: 404 }
-      );
+    if (!report) {
+      console.error("[DynamoDB] Report not found for verification:", reportId);
+      return NextResponse.json({ error: "Report not found" }, { status: 404 });
     }
 
     // =======================================================================
@@ -348,31 +346,46 @@ export async function POST(request: NextRequest) {
       // Image is already uploaded to S3 directly by the client.
       // Optionally we could save the verify image url to the db, but currently it just ignores it.
 
-      // Mark report as resolved
-      const { data: updatedReport, error: updateError } = await supabase
-        .from("reports")
-        .update({ status: "Resolved" })
-        .eq("id", reportId)
-        .select()
-        .single();
-
-      if (updateError) {
-        console.error("Supabase update error:", updateError);
+      // Mark report as resolved in DynamoDB
+      let updatedReport = { ...report, status: "Resolved", resolved_image_url: imageUrl };
+      try {
+        const updateRes = await docClient.send(
+          new UpdateCommand({
+            TableName: REPORTS_TABLE,
+            Key: { id: reportId },
+            UpdateExpression: "SET #st = :resolved, resolved_image_url = :img, resolved_at = :time",
+            ExpressionAttributeNames: { "#st": "status" },
+            ExpressionAttributeValues: {
+              ":resolved": "Resolved",
+              ":img": imageUrl,
+              ":time": new Date().toISOString(),
+            },
+            ReturnValues: "ALL_NEW",
+          })
+        );
+        if (updateRes.Attributes) {
+          updatedReport = updateRes.Attributes as any;
+        }
+      } catch (updateError) {
+        console.error("[DynamoDB] Update error:", updateError);
         return NextResponse.json(
-          { error: "Failed to update report status" },
+          { error: "Failed to update report status in DynamoDB" },
           { status: 500 }
         );
       }
 
-      // Award civic points securely
-      const { error: rpcError } = await supabase.rpc(
-        "increment_civic_points",
-        {
-          points_to_add: 50,
-        }
-      );
-      if (rpcError) {
-        console.error("Failed to increment civic points:", rpcError);
+      // Award civic points securely in DynamoDB CivicPulseProfiles
+      try {
+        await docClient.send(
+          new UpdateCommand({
+            TableName: PROFILES_TABLE,
+            Key: { id: user.id },
+            UpdateExpression: "ADD points :pts",
+            ExpressionAttributeValues: { ":pts": 50 },
+          })
+        );
+      } catch (ptsErr) {
+        console.warn("[DynamoDB] Failed to increment points for verification:", ptsErr);
       }
 
       return NextResponse.json({

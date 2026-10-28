@@ -1,18 +1,28 @@
 "use client";
 
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { createClient } from "@/utils/supabase/client";
-import { Session } from "@supabase/supabase-js";
-
-interface Profile {
-  civic_points: number;
-  avatar_url: string;
-}
-
+import { getCognitoGoogleLoginUrl, getCognitoLogoutUrl } from "@/lib/cognito";
 import StarBorder from "@/components/ui/StarBorder";
 import { LogOut } from "lucide-react";
 import { StaggeredMenu } from "@/components/ui/StaggeredMenu";
+
+interface Profile {
+  points?: number;
+  civic_points?: number;
+  avatar_url?: string;
+  name?: string;
+  email?: string;
+}
+
+interface UserSession {
+  user: {
+    id: string;
+    email?: string;
+    name?: string;
+  };
+}
+
 export function HeaderActions({ 
   onReportClick, 
   onHowItWorksClick,
@@ -24,62 +34,53 @@ export function HeaderActions({
   onSeverityScaleClick: () => void,
   onSeveritySelect?: (severity: number) => void
 }) {
-  const [session, setSession] = useState<Session | null>(null);
+  const [session, setSession] = useState<UserSession | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [menuMode, setMenuMode] = useState<'main' | 'severity'>('main');
-  const supabase = useMemo(() => createClient(), []);
 
-  const fetchProfile = useCallback(async (userId: string) => {
-    const { data } = await supabase
-      .from("profiles")
-      .select("civic_points, avatar_url")
-      .eq("id", userId)
-      .single();
-
-    if (data) {
-      setProfile(data);
+  const fetchUserAndProfile = useCallback(async () => {
+    try {
+      const res = await fetch("/api/auth/me");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.user) {
+          setSession({ user: data.user });
+          setProfile(data.profile || { points: 0 });
+        } else {
+          setSession(null);
+          setProfile(null);
+        }
+      }
+    } catch (e) {
+      console.warn("Failed to fetch AWS Cognito session:", e);
     }
-  }, [supabase]);
+  }, []);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (session) fetchProfile(session.user.id);
-    });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      if (session) fetchProfile(session.user.id);
-    });
+    fetchUserAndProfile();
 
     const handleUpdate = () => {
-      supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
-        if (currentSession) fetchProfile(currentSession.user.id);
-      });
+      fetchUserAndProfile();
     };
 
     window.addEventListener("civicPointsUpdate", handleUpdate);
-
     return () => {
-      subscription.unsubscribe();
       window.removeEventListener("civicPointsUpdate", handleUpdate);
     };
-  }, [supabase, fetchProfile]);
+  }, [fetchUserAndProfile]);
 
-  const handleSignIn = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/dashboard`,
-      },
-    });
+  const handleSignIn = () => {
+    const redirectUri = `${window.location.origin}/dashboard`;
+    window.location.href = getCognitoGoogleLoginUrl(redirectUri);
   };
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch {}
+    setSession(null);
     setProfile(null);
+    window.location.href = getCognitoLogoutUrl(window.location.origin);
   };
 
   const mainMenuItems = [
@@ -100,40 +101,59 @@ export function HeaderActions({
     { label: "← Back", ariaLabel: "Go back", action: () => setMenuMode('main'), preventClose: true }
   ];
 
-  const menuItems = menuMode === 'main' ? mainMenuItems : severityMenuItems;
+  const currentPoints = profile?.points ?? profile?.civic_points ?? 0;
 
   return (
-    <div className="flex items-center gap-4">
+    <div className="flex items-center gap-3">
       {session && (
-        <div className="flex items-center gap-2.5">
-          {profile?.avatar_url ? (
-            /* eslint-disable-next-line @next/next/no-img-element */
-            <img
-              src={profile.avatar_url}
-              alt="Avatar"
-              className="size-[34px] rounded-full object-cover"
-            />
-          ) : (
-            <div className="flex size-[34px] items-center justify-center rounded-full bg-indigo-500/20 text-indigo-400 font-display font-bold text-sm">
-              {(session.user.user_metadata.full_name || session.user.email || "U").charAt(0).toUpperCase()}
-            </div>
-          )}
-          <div className="flex flex-col">
-            <span className="hidden sm:block text-[13px] font-semibold text-[#e8eaf0] leading-tight">
-              {session.user.user_metadata.full_name || session.user.email || "User"}
-            </span>
-            <span className="text-[11px] font-medium text-teal-400 leading-tight mt-0.5">
-              {profile?.civic_points ?? 0} pts
+        <StarBorder color="#22d3ee" speed="4s" className="text-cyan-400 font-semibold cursor-default">
+          <div className="flex items-center gap-2 px-1">
+            <span className="text-sm font-semibold tracking-wide text-cyan-300">
+              {currentPoints} <span className="text-xs font-normal text-cyan-500 uppercase tracking-wider">pts</span>
             </span>
           </div>
-        </div>
+        </StarBorder>
       )}
-      
-      {/* 
-        The StaggeredMenu toggle button sits inline, 
-        but its menu panel opens fixed to cover the screen.
-      */}
-      <StaggeredMenu items={menuItems} />
+
+      {/* Modern Radial Staggered Action Menu */}
+      <StaggeredMenu
+        position="right"
+        items={menuMode === 'main' ? mainMenuItems : severityMenuItems}
+        colors={['#06b6d4', '#3b82f6', '#6366f1']}
+        accentColor="#06b6d4"
+        onMenuOpen={() => setMenuMode('main')}
+      />
+
+      {/* Fallback standard sign in button if preferred on certain breakpoints */}
+      {!session ? (
+        <Button
+          onClick={handleSignIn}
+          variant="outline"
+          className="border-slate-700 hover:border-cyan-500/50 hover:bg-cyan-500/10 text-slate-300 hover:text-white transition-all text-xs font-medium cursor-pointer"
+        >
+          Sign In
+        </Button>
+      ) : (
+        <Button
+          onClick={handleSignOut}
+          variant="ghost"
+          size="icon"
+          title="Sign Out"
+          className="text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+        >
+          <LogOut className="size-4" />
+        </Button>
+      )}
     </div>
+  );
+}
+
+export function LoginButton() {
+  return (
+    <HeaderActions 
+      onReportClick={() => {}}
+      onHowItWorksClick={() => {}}
+      onSeverityScaleClick={() => {}}
+    />
   );
 }

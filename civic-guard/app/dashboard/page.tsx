@@ -6,7 +6,6 @@ import Image from "next/image";
 import { motion, AnimatePresence, Variants } from "motion/react";
 import BlurText from "@/components/ui/BlurText";
 import BubbleMenu from "@/components/ui/BubbleMenu";
-import { Session } from "@supabase/supabase-js";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 dayjs.extend(relativeTime);
@@ -63,7 +62,6 @@ import BorderGlow from "@/components/ui/BorderGlow";
 import Folder from "@/components/ui/Folder";
 import GooeyNav from "@/components/ui/GooeyNav";
 import RotatingText from "@/components/ui/RotatingText";
-import { createClient } from "@/utils/supabase/client";
 import { HeaderActions } from "@/components/ui/LoginButton";
 import localforage from "localforage";
 import { OfflineReportPayload, OFFLINE_REPORT_PREFIX } from "@/lib/offline-types";
@@ -152,9 +150,8 @@ export default function DashboardPage() {
     }, 3000);
   };
 
-  // --- Auth State ---
-  const [session, setSession] = useState<Session | null>(null);
-  const supabase = createClient();
+  // --- Auth State (AWS Cognito) ---
+  const [session, setSession] = useState<{ user: { id: string; email?: string; name?: string } } | null>(null);
   
   const [insights, setInsights] = useState<{
     summary: string;
@@ -162,19 +159,41 @@ export default function DashboardPage() {
     top_recommendations: string[];
   } | null>(null);
 
+  // Handle Cognito OAuth code callback or check existing session
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-    });
+    if (typeof window === "undefined") return;
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get("code");
 
-    return () => subscription.unsubscribe();
-  }, [supabase]);
+    if (code) {
+      const redirectUri = `${window.location.origin}/dashboard`;
+      fetch("/api/auth/token", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code, redirectUri }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.user) {
+            setSession({ user: data.user });
+            window.history.replaceState({}, document.title, window.location.pathname);
+            window.dispatchEvent(new CustomEvent("civicPointsUpdate"));
+            setToast({ message: `Signed in as ${data.user.name || data.user.email}!`, type: "success" });
+          }
+        })
+        .catch((err) => {
+          console.error("Cognito token exchange error:", err);
+        });
+    } else {
+      fetch("/api/auth/me")
+        .then((res) => res.json())
+        .then((data) => {
+          if (data?.user) setSession({ user: data.user });
+        })
+        .catch(() => {});
+    }
+  }, []);
 
   const [showHowItWorks, setShowHowItWorks] = useState(false);
   const cameraInputRef = useRef<HTMLInputElement>(null);

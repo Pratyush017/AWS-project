@@ -1,23 +1,35 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { docClient, REPORTS_TABLE } from "@/lib/dynamodb";
+import { ScanCommand } from "@aws-sdk/lib-dynamodb";
+
+export const runtime = "nodejs";
 
 /**
  * GET /api/reports
- * Returns all reports ordered by most recent first.
+ * Returns all reports from DynamoDB ordered by most recent first.
  */
 export async function GET() {
-  const { data, error } = await supabase
-    .from("reports")
-    .select("*")
-    .order("created_at", { ascending: false });
+  try {
+    const res = await docClient.send(
+      new ScanCommand({
+        TableName: REPORTS_TABLE,
+      })
+    );
 
-  if (error) {
-    console.error("Failed to fetch reports:", error);
+    const items = res.Items || [];
+    // Sort by created_at descending
+    items.sort((a, b) => {
+      const dateA = new Date(a.created_at || 0).getTime();
+      const dateB = new Date(b.created_at || 0).getTime();
+      return dateB - dateA;
+    });
+
+    return NextResponse.json({ reports: items });
+  } catch (error: any) {
+    console.error("[DynamoDB] Failed to fetch reports:", error);
     return NextResponse.json(
-      { error: "Failed to fetch reports" },
+      { error: "Failed to fetch reports from DynamoDB" },
       { status: 500 }
     );
   }
-
-  return NextResponse.json({ reports: data });
 }
