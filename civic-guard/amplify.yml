@@ -4,9 +4,11 @@ frontend:
     preBuild:
       commands:
         - nvm use 20 || nvm install 20
+        - env | grep -E '^(NEXT_PUBLIC_|APP_AWS_|AWS_|GEMINI_|GROQ_)' > .env.production || true
         - npm ci
     build:
       commands:
+        - env | grep -E '^(NEXT_PUBLIC_|APP_AWS_|AWS_|GEMINI_|GROQ_)' > .env.production || true
         - npm run build
   artifacts:
     baseDirectory: .next
