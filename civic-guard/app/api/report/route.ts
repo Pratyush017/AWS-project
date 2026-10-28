@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
     }
 
     // ---- Fetch the image from S3 using AWS SDK to perform AI Triage ----
-    let arrayBuffer: ArrayBuffer;
+    let buffer: Buffer;
     let mimeType = "image/jpeg";
     try {
       const getCommand = new GetObjectCommand({
@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
       const s3Response = await s3Client.send(getCommand);
       const byteArray = await s3Response.Body?.transformToByteArray();
       if (!byteArray) throw new Error("Empty body returned from S3");
-      arrayBuffer = byteArray.buffer;
+      buffer = Buffer.from(byteArray);
       mimeType = s3Response.ContentType || mimeType;
     } catch (err) {
       console.error("Failed to fetch image from S3 using SDK:", err);
@@ -121,7 +121,6 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    const buffer = Buffer.from(arrayBuffer);
 
     const publicUrl = imageUrl;
 

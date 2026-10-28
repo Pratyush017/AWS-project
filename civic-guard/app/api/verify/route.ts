@@ -149,7 +149,7 @@ export async function POST(request: NextRequest) {
     );
 
     // ---- Fetch the verified image from S3 using AWS SDK ----
-    let arrayBuffer: ArrayBuffer;
+    let verifyBuffer: Buffer;
     let verifyMimeType = "image/jpeg";
     try {
       const getCommand = new GetObjectCommand({
@@ -159,7 +159,7 @@ export async function POST(request: NextRequest) {
       const s3Response = await s3Client.send(getCommand);
       const byteArray = await s3Response.Body?.transformToByteArray();
       if (!byteArray) throw new Error("Empty body returned from S3");
-      arrayBuffer = byteArray.buffer;
+      verifyBuffer = Buffer.from(byteArray);
       verifyMimeType = s3Response.ContentType || verifyMimeType;
     } catch (err) {
       console.error("Failed to fetch verification image from S3 using SDK:", err);
@@ -168,7 +168,6 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    const verifyBuffer = Buffer.from(arrayBuffer);
 
     // =======================================================================
     // STAGE 2 — pHash Duplicate Image Guard (Hamming distance > 5)
