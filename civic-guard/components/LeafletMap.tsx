@@ -44,12 +44,12 @@ type MapStyleName = "dark" | "cyberpunk" | "satellite";
 
 const MAP_TILES = {
   dark: {
-    url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-    filter: "none"
+    url: "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}",
+    filter: "brightness(90%) contrast(120%)"
   },
   cyberpunk: {
-    url: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
-    filter: "invert(100%) hue-rotate(180deg) saturate(300%) contrast(150%) brightness(80%)"
+    url: "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}",
+    filter: "invert(100%) hue-rotate(180deg) saturate(300%) contrast(150%) brightness(85%)"
   },
   satellite: {
     url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
@@ -137,6 +137,7 @@ export default function LeafletMap({ reports: allReports, viewMode = "active", f
 
     tileLayerRef.current = L.tileLayer(MAP_TILES.dark.url, {
       maxZoom: 19,
+      maxNativeZoom: 16,
     }).addTo(mapRef.current);
 
     markerClusterGroupRef.current = (L as any).markerClusterGroup({
