@@ -8,17 +8,17 @@ applications:
             - nvm use 20 || nvm install 20
             - env | grep -E '^(NEXT_PUBLIC_|APP_AWS_|AWS_|GEMINI_|GROQ_)' > .env.production || true
             - npm ci
-            - find .. . -type d \( -name "win32" -o -name "darwin" \) -path "*/onnxruntime-node/*" -exec rm -rf {} + 2>/dev/null || true
         build:
           commands:
             - env | grep -E '^(NEXT_PUBLIC_|APP_AWS_|AWS_|GEMINI_|GROQ_)' > .env.production || true
-            - find .. . -type d \( -name "win32" -o -name "darwin" \) -path "*/onnxruntime-node/*" -exec rm -rf {} + 2>/dev/null || true
             - npm run build
-        postBuild:
-          commands:
             - rm -rf .next/cache || true
             - rm -rf .next/standalone || true
-            - find .. . -type d \( -name "win32" -o -name "darwin" \) -path "*/onnxruntime-node/*" -exec rm -rf {} + 2>/dev/null || true
+            - rm -rf node_modules/onnxruntime-node || true
+            - rm -rf node_modules/typescript || true
+            - rm -rf node_modules/@types || true
+            - rm -rf node_modules/@next/swc* || true
+            - rm -rf node_modules/eslint* || true
       artifacts:
         baseDirectory: .next
         files:
