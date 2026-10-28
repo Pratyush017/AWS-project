@@ -1,8 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: "standalone",
-  outputFileTracingRoot: process.cwd(),
   serverExternalPackages: ["onnxruntime-node", "sharp", "sharp-phash"],
   images: {
     remotePatterns: [

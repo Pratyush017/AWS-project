@@ -12,6 +12,7 @@ applications:
           commands:
             - env | grep -E '^(NEXT_PUBLIC_|APP_AWS_|AWS_|GEMINI_|GROQ_)' > .env.production || true
             - npm run build
+            - rm -rf .next/cache
       artifacts:
         baseDirectory: .next
         files:
@@ -19,4 +20,3 @@ applications:
       cache:
         paths:
           - node_modules/**/*
-          - .next/cache/**/*
