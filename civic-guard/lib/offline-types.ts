@@ -19,6 +19,10 @@ export interface OfflineReportPayload {
   sync_status: 'pending' | 'synced' | 'failed';
   /** ISO 8601 timestamp of when the report was cached offline */
   created_at: string;
+  /** Number of sync attempts */
+  retryCount?: number;
+  /** Last failure reason */
+  lastError?: string;
 }
 
 /** Prefix used for all offline report keys in localforage */

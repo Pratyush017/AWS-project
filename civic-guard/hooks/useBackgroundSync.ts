@@ -15,6 +15,8 @@ interface BackgroundSyncResult {
   pendingCount: number;
   /** Manually trigger a flush (e.g., from a retry button) */
   flushQueue: () => Promise<void>;
+  /** Manually discard all stuck offline reports */
+  clearQueue: () => Promise<void>;
 }
 
 /**
@@ -43,10 +45,28 @@ export function useBackgroundSync(
     }
   }, []);
 
+  const clearQueue = useCallback(async () => {
+    try {
+      const keys = await localforage.keys();
+      const reportKeys = keys.filter((k) => k.startsWith(OFFLINE_REPORT_PREFIX));
+      for (const k of reportKeys) {
+        await localforage.removeItem(k);
+      }
+      setPendingCount(0);
+      setIsSyncing(false);
+      onToast({ message: "Cleared stuck offline reports.", type: "info" });
+    } catch (e) {
+      console.error("[BackgroundSync] Error clearing queue:", e);
+    }
+  }, [onToast]);
+
   const flushQueue = useCallback(async () => {
     // Prevent concurrent flushes
     if (isFlushing.current) return;
-    if (!navigator.onLine) return;
+    if (!navigator.onLine) {
+      console.log("[BackgroundSync] Device is still offline, cannot flush.");
+      return;
+    }
 
     isFlushing.current = true;
     setIsSyncing(true);
@@ -58,9 +78,11 @@ export function useBackgroundSync(
       if (reportKeys.length === 0) {
         setIsSyncing(false);
         isFlushing.current = false;
+        setPendingCount(0);
         return;
       }
 
+      console.log(`[BackgroundSync] Found ${reportKeys.length} pending report(s) in IndexedDB. Flushing...`);
       let syncedCount = 0;
 
       for (const key of reportKeys) {
@@ -94,13 +116,18 @@ export function useBackgroundSync(
           });
 
           if (!uploadRes.ok) {
-            console.warn(`[BackgroundSync] Failed to get upload URL for ${key}`);
+            const errData = await uploadRes.json().catch(() => ({}));
+            console.error(`[BackgroundSync] Failed to get upload URL:`, errData);
+            onToast({
+              message: errData.error || "Could not connect to S3 storage to sync offline report.",
+              type: "error",
+            });
             break;
           }
 
           const { uploadUrl, finalImageUrl, key: imageKey } = await uploadRes.json();
 
-          // 2. Upload to S3
+          // 2. Upload directly to S3
           const s3Res = await fetch(uploadUrl, {
             method: "PUT",
             headers: {
@@ -110,10 +137,15 @@ export function useBackgroundSync(
           });
 
           if (!s3Res.ok) {
-            console.warn(`[BackgroundSync] Failed to upload image to S3 for ${key}`);
+            console.error(`[BackgroundSync] Failed to upload image to S3 for ${key}`);
+            onToast({
+              message: "Failed to upload offline photo to cloud storage. Retrying shortly.",
+              type: "error",
+            });
             break;
           }
 
+          // 3. Submit report to backend API
           const formData = new FormData();
           formData.append("imageUrl", finalImageUrl);
           formData.append("imageKey", imageKey);
@@ -126,25 +158,48 @@ export function useBackgroundSync(
           });
 
           if (res.ok) {
-            // Success — remove from IndexedDB and inject into state
+            // Success — remove from IndexedDB and inject into UI state
             const { report } = await res.json();
             await localforage.removeItem(key);
             syncedCount++;
             onReportSynced((prev) => [report, ...prev]);
+            console.log(`[BackgroundSync] Successfully synced report ${key}`);
           } else if (res.status === 401) {
-            // Auth expired — stop the queue, user needs to re-login
-            console.warn("[BackgroundSync] Auth expired, pausing queue.");
+            // Not authenticated — don't delete report, but pause queue so user can sign in
+            console.warn("[BackgroundSync] User is not authenticated. Pausing offline queue.");
             onToast({
-              message: "Session expired. Please sign in to sync offline reports.",
+              message: "Please sign in to sync your offline report.",
               type: "error",
             });
             break;
+          } else if (res.status === 400) {
+            // AI rejection or validation error (invalid image, fraudulent, etc.)
+            // Must be removed from IndexedDB so it doesn't spin in a 30-minute retry loop!
+            const errData = await res.json().catch(() => ({}));
+            const reason = errData.error || "Image was rejected by AI triage.";
+            await localforage.removeItem(key);
+            console.warn(`[BackgroundSync] Report rejected by AI (${reason}). Removed from queue.`);
+            onToast({
+              message: `Offline report rejected: ${reason}`,
+              type: "error",
+            });
           } else {
-            // Server error (5xx, 429, etc.) — leave in IndexedDB for next cycle
-            console.warn(`[BackgroundSync] Server returned ${res.status} for ${key}, will retry.`);
+            // Server error (5xx, etc.) — leave in IndexedDB and increment retry
+            payload.retryCount = (payload.retryCount || 0) + 1;
+            if (payload.retryCount > 5) {
+              console.warn(`[BackgroundSync] Max retries reached for ${key}. Discarding.`);
+              await localforage.removeItem(key);
+              onToast({
+                message: "Could not sync offline report after multiple attempts.",
+                type: "error",
+              });
+            } else {
+              await localforage.setItem(key, payload);
+            }
+            break;
           }
         } catch (networkErr) {
-          // Network failed mid-flush — stop and retry later
+          // Network failed mid-flush — pause and retry when back online
           console.warn("[BackgroundSync] Network error during flush:", networkErr);
           break;
         }
@@ -155,7 +210,6 @@ export function useBackgroundSync(
           message: `✅ Synced ${syncedCount} offline report${syncedCount > 1 ? "s" : ""} successfully!`,
           type: "success",
         });
-        // Notify LoginButton to refresh points
         window.dispatchEvent(new CustomEvent("civicPointsUpdate"));
       }
     } catch (err) {
@@ -171,13 +225,14 @@ export function useBackgroundSync(
     // Count pending on mount
     refreshPendingCount();
 
-    // If already online, try flushing any leftover items from a previous session
-    if (navigator.onLine) {
+    // If online, try flushing on mount
+    if (typeof navigator !== "undefined" && navigator.onLine) {
       flushQueue();
     }
 
     // Listen for reconnection
     const handleOnline = () => {
+      console.log("[BackgroundSync] Online event detected! Triggering flush.");
       flushQueue();
     };
 
@@ -188,5 +243,5 @@ export function useBackgroundSync(
     };
   }, [flushQueue, refreshPendingCount]);
 
-  return { isSyncing, pendingCount, flushQueue };
+  return { isSyncing, pendingCount, flushQueue, clearQueue };
 }

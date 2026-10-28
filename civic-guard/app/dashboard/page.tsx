@@ -40,6 +40,8 @@ import {
   TrendingUp,
   TrendingDown,
   Minus,
+  RefreshCw,
+  X,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -207,7 +209,7 @@ export default function DashboardPage() {
   const [mobileView, setMobileView] = useState<'feed' | 'map'>('feed');
 
   // --- Offline Sync Engine ---
-  const { isSyncing, pendingCount } = useBackgroundSync(
+  const { isSyncing, pendingCount, flushQueue, clearQueue } = useBackgroundSync(
     setReports as (updater: (prev: unknown[]) => unknown[]) => void,
     setToast as (toast: { message: string; type: "success" | "error" | "info" }) => void
   );
@@ -830,9 +832,33 @@ export default function DashboardPage() {
           <div className="flex items-center gap-2 md:gap-3">
             {/* Offline Sync Indicator */}
             {(isSyncing || pendingCount > 0) && (
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-medium animate-pulse">
-                <Loader2 className="size-3 animate-spin" />
-                <span className="hidden sm:inline">{isSyncing ? "Syncing..." : `${pendingCount} pending`}</span>
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 text-xs font-medium">
+                {isSyncing ? (
+                  <>
+                    <Loader2 className="size-3 animate-spin text-amber-400" />
+                    <span>Syncing...</span>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => flushQueue()}
+                      className="flex items-center gap-1 hover:text-amber-300 transition-colors cursor-pointer"
+                      title="Click to retry syncing now"
+                    >
+                      <RefreshCw className="size-3" />
+                      <span>{pendingCount} pending</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => clearQueue()}
+                      className="ml-1 text-slate-400 hover:text-red-400 transition-colors cursor-pointer p-0.5 rounded"
+                      title="Discard stuck offline report"
+                    >
+                      <X className="size-3" />
+                    </button>
+                  </>
+                )}
               </div>
             )}
             <HeaderActions 
