@@ -30,3 +30,4 @@ export function getAuthenticatedUser(request: NextRequest): ServerAuthUser | nul
     name: payload.name || payload.email?.split("@")[0] || "Civic Hero",
   };
 }
+

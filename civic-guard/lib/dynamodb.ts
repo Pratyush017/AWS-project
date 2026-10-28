@@ -19,3 +19,4 @@ export const docClient = DynamoDBDocumentClient.from(ddbClient, {
 
 export const REPORTS_TABLE = "CivicPulseReports";
 export const PROFILES_TABLE = "CivicPulseProfiles";
+

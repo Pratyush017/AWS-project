@@ -62,3 +62,4 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ user: null, profile: null, error: err.message });
   }
 }
+

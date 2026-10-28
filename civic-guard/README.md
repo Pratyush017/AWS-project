@@ -61,9 +61,15 @@ This is not a public sandbox. CivicPulse is built on a hardened, production-read
 3. **Environment Variables:**
    Create a `.env.local` file and add your keys:
    ```env
-   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
-   GEMINI_API_KEY=your_google_ai_key
+   APP_AWS_ACCESS_KEY_ID=your_access_key
+   APP_AWS_SECRET_ACCESS_KEY=your_secret_key
+   APP_AWS_REGION=ap-south-1
+   NEXT_PUBLIC_S3_BUCKET_NAME=your_s3_bucket
+   NEXT_PUBLIC_COGNITO_USER_POOL_ID=your_user_pool_id
+   NEXT_PUBLIC_COGNITO_CLIENT_ID=your_client_id
+   NEXT_PUBLIC_COGNITO_DOMAIN=your_cognito_domain
+   GEMINI_API_KEY=your_gemini_api_key
+   GROQ_API_KEY=your_groq_api_key
    ```
 
 4. **Run the development server:**

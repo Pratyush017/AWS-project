@@ -8,3 +8,4 @@ export async function POST() {
   response.cookies.delete("cognito_user_id");
   return response;
 }
+

@@ -64,3 +64,4 @@ export function parseJwtPayload(token: string): any {
     return null;
   }
 }
+
