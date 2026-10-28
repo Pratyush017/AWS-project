@@ -8,11 +8,18 @@ applications:
             - nvm use 20 || nvm install 20
             - env | grep -E '^(NEXT_PUBLIC_|APP_AWS_|AWS_|GEMINI_|GROQ_)' > .env.production || true
             - npm ci
+            - rm -rf node_modules/onnxruntime-node/bin/napi-v6/win32 || true
+            - rm -rf node_modules/onnxruntime-node/bin/napi-v6/darwin || true
         build:
           commands:
             - env | grep -E '^(NEXT_PUBLIC_|APP_AWS_|AWS_|GEMINI_|GROQ_)' > .env.production || true
             - npm run build
-            - rm -rf .next/cache
+        postBuild:
+          commands:
+            - rm -rf .next/cache || true
+            - rm -rf .next/standalone || true
+            - rm -rf node_modules/onnxruntime-node/bin/napi-v6/win32 || true
+            - rm -rf node_modules/onnxruntime-node/bin/napi-v6/darwin || true
       artifacts:
         baseDirectory: .next
         files:
