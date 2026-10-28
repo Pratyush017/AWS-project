@@ -176,9 +176,47 @@ export async function POST(request: NextRequest) {
       }
       // action === "escalate" falls through with onnxHandled = false
     } catch (onnxError) {
-      // onnxruntime-node unavailable (e.g., Vercel: libonnxruntime.so.1 missing).
-      // Silently fall through to Gemini escalation.
-      console.warn("[ONNX Router] Native runtime unavailable, escalating to Gemini:", onnxError);
+      // onnxruntime-node unavailable in serverless (missing libonnxruntime.so.1).
+      // Check if client-side onnxruntime-web already classified the hazard
+      const clientOnnxAction = formData.get("onnxAction") as string | null;
+      const clientOnnxLabel = formData.get("onnxLabel") as string | null;
+      const clientOnnxSeverity = parseInt((formData.get("onnxSeverity") as string) || "3", 10);
+      const clientOnnxConfidence = parseFloat((formData.get("onnxConfidence") as string) || "0");
+
+      if (clientOnnxAction === "accept" && clientOnnxLabel && clientOnnxConfidence >= 0.70) {
+        try {
+          const { describeReport } = await import("@/lib/describe");
+          const generatedDesc = await describeReport({
+            label: clientOnnxLabel,
+            severity: clientOnnxSeverity,
+            latitude: lat,
+            longitude: lng,
+          });
+
+          const severityMapReverse: Record<number, "Low" | "Medium" | "Critical"> = {
+            1: "Low",
+            2: "Low",
+            3: "Medium",
+            4: "Medium",
+            5: "Critical",
+          };
+
+          parsed = {
+            isAuthentic: true,
+            fraudReason: null,
+            category: clientOnnxLabel,
+            title: `${clientOnnxLabel.replace(/_/g, ' ').toUpperCase()} Report`,
+            description: generatedDesc,
+            severity: severityMapReverse[clientOnnxSeverity] || "Medium",
+          };
+          onnxHandled = true;
+          console.log(`[ONNX Router] Handled by browser ONNX inference: ${clientOnnxLabel} (${(clientOnnxConfidence * 100).toFixed(1)}%)`);
+        } catch (descErr) {
+          console.warn("[ONNX Router] Could not describe browser ONNX report:", descErr);
+        }
+      } else {
+        console.warn("[ONNX Router] Native runtime unavailable, escalating to Gemini:", onnxError);
+      }
     }
 
     if (!onnxHandled) {

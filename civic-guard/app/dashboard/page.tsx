@@ -58,6 +58,7 @@ import { StaggeredMenu } from "@/components/ui/StaggeredMenu";
 import AnimatedItem from "@/components/ui/AnimatedItem";
 import StarBorder from "@/components/ui/StarBorder";
 import TiltedCard from "@/components/ui/TiltedCard";
+import { classifyImageInBrowser, ClientClassificationResult } from "@/lib/client-classifier";
 import BorderGlow from "@/components/ui/BorderGlow";
 import Folder from "@/components/ui/Folder";
 import GooeyNav from "@/components/ui/GooeyNav";
@@ -113,6 +114,8 @@ export default function DashboardPage() {
   // Upload form state
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [onnxResult, setOnnxResult] = useState<ClientClassificationResult | null>(null);
+  const [isOnnxRunning, setIsOnnxRunning] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [locationStatus, setLocationStatus] = useState<
     "idle" | "fetching" | "success" | "error"
@@ -245,10 +248,24 @@ export default function DashboardPage() {
   // --- File handling (Report) ---
   const handleFileChange = (file: File | null) => {
     setSelectedFile(file);
+    setOnnxResult(null);
     if (file) {
-      setPreviewUrl(URL.createObjectURL(file));
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
+      setIsOnnxRunning(true);
+      classifyImageInBrowser(url)
+        .then((res) => {
+          setOnnxResult(res);
+        })
+        .catch((err) => {
+          console.warn("[Client ONNX] Error:", err);
+        })
+        .finally(() => {
+          setIsOnnxRunning(false);
+        });
     } else {
       setPreviewUrl(null);
+      setIsOnnxRunning(false);
     }
   };
 
@@ -426,6 +443,13 @@ export default function DashboardPage() {
       formData.append("latitude", String(lat));
       formData.append("longitude", String(lng));
 
+      if (onnxResult) {
+        formData.append("onnxLabel", onnxResult.label);
+        formData.append("onnxConfidence", String(onnxResult.confidence));
+        formData.append("onnxSeverity", String(onnxResult.severity));
+        formData.append("onnxAction", onnxResult.action);
+      }
+
       const res = await fetch("/api/report", {
         method: "POST",
         body: formData,
@@ -478,6 +502,8 @@ export default function DashboardPage() {
     }
     setSelectedFile(null);
     setPreviewUrl(null);
+    setOnnxResult(null);
+    setIsOnnxRunning(false);
     setCoords(null);
     setLocationStatus("idle");
     setDragActive(false);
@@ -915,6 +941,53 @@ export default function DashboardPage() {
                       alt="Preview"
                       className="max-h-48 w-full rounded-lg object-cover shadow-lg"
                     />
+
+                    {/* On-device ONNX AI Live Detection Feedback */}
+                    {isOnnxRunning && (
+                      <div className="mt-2.5 flex items-center gap-2 rounded-lg bg-cyan-950/40 border border-cyan-800/40 p-2.5 text-xs text-cyan-300">
+                        <Loader2 className="size-3.5 animate-spin text-cyan-400" />
+                        <span>Running on-device fine-tuned ONNX classifier...</span>
+                      </div>
+                    )}
+
+                    {!isOnnxRunning && onnxResult && onnxResult.action === "accept" && (
+                      <div className="mt-2.5 flex items-center justify-between rounded-lg bg-emerald-950/50 border border-emerald-500/40 p-2.5 text-xs text-emerald-300">
+                        <div className="flex items-center gap-2">
+                          <span className="flex size-2 rounded-full bg-emerald-400 animate-pulse" />
+                          <span className="font-semibold text-emerald-200">On-Device AI:</span>
+                          <span>{onnxResult.humanLabel}</span>
+                        </div>
+                        <span className="rounded bg-emerald-500/20 px-2 py-0.5 font-mono text-[11px] text-emerald-300">
+                          {(onnxResult.confidence * 100).toFixed(0)}% match
+                        </span>
+                      </div>
+                    )}
+
+                    {!isOnnxRunning && onnxResult && onnxResult.action === "reject" && (
+                      <div className="mt-2.5 flex items-center justify-between rounded-lg bg-amber-950/50 border border-amber-500/40 p-2.5 text-xs text-amber-300">
+                        <div className="flex items-center gap-2">
+                          <Sparkles className="size-3.5 text-amber-400" />
+                          <span className="font-semibold text-amber-200">On-Device AI:</span>
+                          <span>No hazard identified</span>
+                        </div>
+                        <span className="rounded bg-amber-500/20 px-2 py-0.5 font-mono text-[11px] text-amber-300">
+                          {(onnxResult.confidence * 100).toFixed(0)}%
+                        </span>
+                      </div>
+                    )}
+
+                    {!isOnnxRunning && onnxResult && onnxResult.action === "escalate" && (
+                      <div className="mt-2.5 flex items-center justify-between rounded-lg bg-blue-950/50 border border-blue-500/30 p-2.5 text-xs text-blue-300">
+                        <div className="flex items-center gap-2">
+                          <Sparkles className="size-3.5 text-blue-400" />
+                          <span>Edge model uncertain — escalating to Gemini</span>
+                        </div>
+                        <span className="rounded bg-blue-500/20 px-1.5 py-0.5 text-[10px] text-blue-300">
+                          Cloud Triage
+                        </span>
+                      </div>
+                    )}
+
                     <button
                       type="button"
                       onClick={(e) => {
