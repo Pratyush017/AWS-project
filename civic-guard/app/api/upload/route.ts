@@ -3,10 +3,10 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 const s3Client = new S3Client({
-  region: process.env.AWS_REGION!,
+  region: process.env.APP_AWS_REGION || process.env.AWS_REGION!,
   credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+    accessKeyId: process.env.APP_AWS_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.APP_AWS_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY!,
   },
 });
 
@@ -30,7 +30,8 @@ export async function POST(request: NextRequest) {
     });
 
     const uploadUrl = await getSignedUrl(s3Client, command, { expiresIn: 60 });
-    const finalImageUrl = `https://${process.env.NEXT_PUBLIC_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
+    const awsRegion = process.env.APP_AWS_REGION || process.env.AWS_REGION || "ap-south-1";
+    const finalImageUrl = `https://${process.env.NEXT_PUBLIC_S3_BUCKET_NAME}.s3.${awsRegion}.amazonaws.com/${key}`;
 
     return NextResponse.json({ uploadUrl, finalImageUrl, key });
   } catch (error) {
