@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ["onnxruntime-node", "sharp", "sharp-phash"],
+  serverExternalPackages: ["sharp", "sharp-phash"],
   images: {
     remotePatterns: [
       {
