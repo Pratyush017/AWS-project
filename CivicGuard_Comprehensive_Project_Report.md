@@ -1,156 +1,648 @@
 # CivicGuard (CiviPulse)
 ## Autonomous Civic Infrastructure Intelligence & Forensic Verification Platform
-### Comprehensive Engineering, Machine Learning & AWS Cloud Architecture Report
+### Comprehensive Engineering, Machine Learning & AWS Serverless Architecture Report
 
 ---
 
-**Project Lead & Lead Engineer:** Pratyush Raj  
+**Author / Lead Engineer:** Pratyush Raj  
 **Department:** Information Technology, Vellore Institute of Technology (VIT), Vellore  
-**Document Version:** 3.0.0 (Production Release)  
+**Document Version:** 3.1.0 (Production Verified)  
 **Cloud Ecosystem:** 100% Amazon Web Services (AWS) Serverless Architecture  
+**Target AWS Region:** Asia Pacific (Mumbai) `ap-south-1`  
 **Date:** October 2026  
 
 ---
 
 ```
 ========================================================================================
-                               DOCUMENT CLASSIFICATION
-                          TECHNICAL ARCHITECTURE REPORT
-                                 SPECIAL EDITION:
-                   CUSTOM EDGE-AI & FULL-STACK AWS SERVERLESS
+                                DOCUMENT CLASSIFICATION
+                             TECHNICAL ARCHITECTURE REPORT
+                                    SPECIAL EDITION:
+                      CUSTOM EDGE-AI & FULL-STACK AWS SERVERLESS
 ========================================================================================
 ```
 
 ---
 
 ## Table of Contents
-1. [Executive Summary & Problem Statement](#1-executive-summary--problem-statement)
-2. [End-to-End System Overview & Feature Catalog](#2-end-to-end-system-overview--feature-catalog)
-3. [The Custom Fine-Tuned Edge AI Model (YOLO11n-cls INT8)](#3-the-custom-fine-tuned-edge-ai-model-yolo11n-cls-int8)
-   - 3.1. The Quota Crisis & Motivation
-   - 3.2. Architecture Selection: YOLO11n-cls vs. Alternatives
-   - 3.3. Dataset Provenance, Label Reconstruction & Curation
-   - 3.4. Preprocessing, Noise Filtering & Grouped Splitting
-   - 3.5. Training Regimen, Baselines & Benchmarking
-   - 3.6. The 99.1% Deception: Source Leakage & Out-of-Distribution Diagnosis
-   - 3.7. Dataset Remediation & Real-World Validation
-   - 3.8. Post-Training INT8 Quantization & Model Optimization
-   - 3.9. Cross-Language Parity Check: Python PyTorch vs. TypeScript WebAssembly
-4. [Multi-Tier Hybrid AI Triage & Fallback Architecture](#4-multi-tier-hybrid-ai-triage--fallback-architecture)
-5. [The 4-Stage Autonomous Forensic Verification Pipeline](#5-the-4-stage-autonomous-forensic-verification-pipeline)
-6. [Offline-First Resilience & Distributed Sync Engine](#6-offline-first-resilience--distributed-sync-engine)
-7. [Comprehensive AWS Serverless Cloud Architecture](#7-comprehensive-aws-serverless-cloud-architecture)
-   - 7.1. Global Topography & Infrastructure Topology
-   - 7.2. AWS Amplify Hosting (Next.js 16 SSR Compute Engine)
-   - 7.3. AWS Cognito User Pools & Google OAuth 2.0 Identity Federation
-   - 7.4. Amazon DynamoDB (NoSQL Data Architecture & Access Patterns)
-   - 7.5. Amazon Simple Storage Service (S3) & Presigned Ingestion
-   - 7.6. AWS IAM Policies & Security Perimeter
-8. [Database Engineering: DynamoDB Schema & Access Patterns](#8-database-engineering-dynamodb-schema--access-patterns)
-9. [UI/UX Engineering, Design Tokens & Geospatial Visualization](#9-uiux-engineering-design-tokens--geospatial-visualization)
-10. [Cost, Latency, and Scalability Analysis](#10-cost-latency-and-scalability-analysis)
-11. [Visual Evidence & Screenshot Manifest](#11-visual-evidence--screenshot-manifest)
-12. [Future Roadmap & Municipal Integrations](#12-future-roadmap--municipal-integrations)
-13. [Appendix: Environmental Variables, API Specs & Code Manifest](#13-appendix-environmental-variables-api-specs--code-manifest)
+1. [Abstract](#1-abstract)
+2. [Introduction](#2-introduction)
+   - 2.1 The Municipal Coordination Deficit
+   - 2.2 Systemic Deficiencies in Legacy Civic Portals
+   - 2.3 The CivicGuard Value Proposition
+3. [Description & System Architecture (with Visual Evidence & Screenshots)](#3-description--system-architecture-with-visual-evidence--screenshots)
+   - 3.1 High-Level Architecture Topology
+   - 3.2 End-to-End Incident Lifecycle
+   - 3.3 Visual Evidence & Screenshot Manifest (Exhibits 1–6)
+4. [Sample Code: Core Concepts & Implementation](#4-sample-code-core-concepts--implementation)
+   - 4.1 In-Browser WebAssembly Classifier (`lib/client-classifier.ts`)
+   - 4.2 Multi-Tier Ingestion & AI Triage Handler (`app/api/report/route.ts`)
+   - 4.3 4-Stage Autonomous Forensic Verification Gateway (`app/api/verify/route.ts`)
+   - 4.4 Offline-First Sync & Self-Healing Replay Engine (`hooks/useBackgroundSync.ts`)
+   - 4.5 Amazon S3 Presigned URL Media Ingestion (`app/api/upload/route.ts`)
+   - 4.6 Server-Side Cognito Session Management (`lib/server-auth.ts` & `app/api/auth/token/route.ts`)
+   - 4.7 DynamoDB Document Client Configuration (`lib/dynamodb.ts`)
+   - 4.8 Amplify SSR Build Specification & Binary Pruning (`amplify.yml`)
+5. [The Custom Fine-Tuned Edge AI Model (YOLO11n-cls INT8)](#5-the-custom-fine-tuned-edge-ai-model-yolo11n-cls-int8)
+   - 5.1 Architecture Justification & Parameter Profile
+   - 5.2 Multi-Source Dataset Provenance & Label Reconstruction
+   - 5.3 Preprocessing, Quality Filtering & Grouped Splitting
+   - 5.4 Training Regimen, Baselines & Benchmarking
+   - 5.5 The 99.1% Deception: Source Leakage & Out-of-Distribution Diagnosis
+   - 5.6 Dataset Remediation with Places365 Scene Negatives
+   - 5.7 Post-Training INT8 Quantization (PTQ)
+   - 5.8 Cross-Language Preprocessing & Tensor Parity Proof
+6. [Multi-Tier Hybrid AI Triage & Fallback Architecture](#6-multi-tier-hybrid-ai-triage--fallback-architecture)
+   - 6.1 Multi-Tier Execution Pipeline
+   - 6.2 Threshold Definitions & Nuances
+   - 6.3 LLM Description & Synthesis Chain
+7. [The 4-Stage Autonomous Forensic Verification Pipeline](#7-the-4-stage-autonomous-forensic-verification-pipeline)
+   - 7.1 Stage 1: Spatial Gating (Haversine Formula)
+   - 7.2 Stage 2: Duplication Gating (sharp-phash)
+   - 7.3 Stage 3: Negative Edge Testing (Classifier Check)
+   - 7.4 Stage 4: Multi-Modal Visual Forensics (Comparative Arbiter)
+8. [Offline-First Resilience & Distributed Sync Engine](#8-offline-first-resilience--distributed-sync-engine)
+   - 8.1 IndexedDB Storage Architecture
+   - 8.2 Lifecycle Management & Eviction Rules
+9. [Comprehensive AWS Serverless Cloud Architecture](#9-comprehensive-aws-serverless-cloud-architecture)
+   - 9.1 AWS Amplify Hosting (Next.js 16 SSR Compute)
+   - 9.2 AWS Cognito User Pools & Google OAuth 2.0 Federation
+   - 9.3 Amazon DynamoDB Architecture
+   - 9.4 Amazon S3 Bucket & Access Controls
+   - 9.5 AWS IAM Scoping & Security Perimeter
+10. [Geospatial GIS Engine & UI Design System](#10-geospatial-gis-engine--ui-design-system)
+    - 10.1 Leaflet GIS Integration with Esri ArcGIS Dark Gray Base
+    - 10.2 Cyber-Dark Design Tokens & Visual Hierarchy
+11. [Performance, Latency & Economic Cost Analysis](#11-performance-latency--economic-cost-analysis)
+12. [Future Roadmap & Conclusions](#12-future-roadmap--conclusions)
+13. [Appendix: Environment Variables & REST API Manifest](#13-appendix-environment-variables--rest-api-manifest)
 
 ---
 
-# 1. Executive Summary & Problem Statement
+# 1. Abstract
 
-### 1.1 The Urban Infrastructure Dilemma
-Municipal governance across modern metropolitan areas struggles with an acute coordination deficit. Citizens encounter localized hazards daily—hazardous potholes, open sewer flooding, broken municipal lighting, and illegal waste dumps—yet reporting mechanisms remain archaic. Legacy civic reporting platforms suffer from three systemic failure modes:
-1. **Reporting Friction & Latency:** Citizens must navigate cumbersome portals, manually select administrative departments, and write extensive descriptions. Consequently, less than 4% of observed hazards are ever formally reported.
-2. **Spam, Mislabeled Data, and Triage Bottlenecks:** Municipal work orders are inundated with duplicates, non-civic imagery (e.g., selfies, parking complaints, indoor damage), and out-of-focus captures. Human triage teams spend hundreds of aggregate hours filtering noise before dispatching road crews.
-3. **The Verification & Fraud Void:** When municipal agencies claim a hazard has been repaired, there is zero verifiable feedback loop. Conversely, when civic engagement is gamified with rewards or municipal points, malicious actors exploit systems with internet stock photos, re-uploaded duplicates, or photographs taken miles away from the reported incident.
+**CivicGuard (CiviPulse)** is an autonomous, full-stack, cloud-native civic infrastructure monitoring and forensic resolution verification platform. Urban municipal authorities face severe bottlenecks in triaging civic complaints (potholes, garbage dumps, and road waterlogging) due to excessive reporting friction, fraudulent or duplicate image submissions, and unverified work-order closures. Traditional cloud-based computer vision approaches introduce unsustainable latency and cost overheads, and quickly exhaust API quotas on free or tiered commercial endpoints.
 
-### 1.2 The CivicGuard Paradigm
-**CivicGuard** (also referred to as **CiviPulse**) addresses these foundational defects through an **Autonomous Civic Infrastructure Intelligence Platform**. CivicGuard eliminates manual classification, manual report drafting, and manual verification through a unified **Hybrid Cloud + Edge AI Architecture**:
+CivicGuard resolves these architectural bottlenecks through a **Hybrid Edge-and-Cloud AI Architecture** combined with a **100% AWS Serverless Cloud Stack**:
+1. **Edge-First Computer Vision:** A fine-tuned, 8-bit quantized neural network based on the **YOLO11n-cls** architecture (1,531,148 parameters; 1.6 MB artifact size) executes client-side directly within the citizen's browser using WebAssembly (`onnxruntime-web`). The model classifies imagery across four target classes (`garbage_dump`, `not_a_hazard`, `pothole`, `waterlogging`) in under 50 ms on modern hardware with zero cloud compute expense.
+2. **Multi-Tier Fallback Hierarchy:** In-browser edge classifications meeting confidence thresholds ($\ge 0.70$ on client, with severity heuristics) bypass heavy cloud vision models, invoking high-throughput text models (Groq Llama-3.1-8b-instant, Cerebras, Mistral) for metadata synthesis. Ambiguous edge cases escalate to cloud multimodal models (Google Gemini 2.5 Flash and Groq Qwen-3.6-27b).
+3. **4-Stage Forensic Resolution Pipeline:** Proof-of-repair submissions are systematically validated through:
+   - *Stage 1:* Mathematical Haversine GPS proximity gating ($d \le 50\text{ m}$, HTTP 403 on violation).
+   - *Stage 2:* Perceptual hashing (`sharp-phash`, Hamming distance $D_H \le 5$ duplicate rejection).
+   - *Stage 3:* Negative classifier verification (ensuring the original hazard is no longer detectable with confidence $\ge 0.80$).
+   - *Stage 4:* Multi-modal visual forensic arbitration (`openai/gpt-oss-120b` $\rightarrow$ `qwen/qwen3.6-27b` $\rightarrow$ `gemini-2.5-flash`).
+4. **AWS Serverless Infrastructure:** Fully hosted on AWS in `ap-south-1` (Mumbai) using **AWS Amplify Hosting** (Next.js 16.2.9 SSR), **AWS Cognito User Pools** (federated with Google OAuth 2.0), **Amazon DynamoDB** (single-digit millisecond latency with atomic expressions), and **Amazon S3** (client-side streaming via 60-second presigned PUT URLs).
 
-* **Instant Edge Vision:** A custom-trained, fine-tuned **YOLO11n-cls INT8** neural network (1.6 MB) executes directly inside the citizen’s web browser via WebAssembly (`onnxruntime-web`), classifying hazards in under 50 milliseconds with zero server compute overhead.
-* **Autonomous Multi-Modal Triage:** Unambiguous hazards are accepted locally and structured via high-throughput LLM synthesis; uncertain edge cases automatically escalate to **Google Gemini 2.5 Flash** for multi-modal forensics.
-* **4-Stage Mathematical & Visual Verification:** Citizen-submitted repair proofs must pass a strict cryptographic and physical gauntlet: **Haversine GPS boundary gating (<50m)**, **Perceptual Hashing duplicate rejection (pHash $\le 5$)**, **Negative Classifier validation**, and **Multi-Modal Visual Forensic Comparison**.
-* **100% AWS Serverless Enterprise Stack:** Deployed with enterprise-grade resilience utilizing **AWS Amplify Hosting**, **AWS Cognito User Pools** (federated with Google OAuth 2.0), **Amazon DynamoDB**, and **Amazon Simple Storage Service (S3)**.
+---
+
+# 2. Introduction
+
+### 2.1 The Municipal Coordination Deficit
+Urban infrastructure is subject to continuous wear from vehicular traffic, extreme precipitation, and civic strain. Potholes degrade vehicular safety, illegal open garbage dumping creates public health hazards, and monsoon waterlogging paralyzes transit networks. While municipal corporations possess maintenance budgets and field repair personnel, the communication feedback loop between citizens and public work departments remains fundamentally broken.
+
+### 2.2 Systemic Deficiencies in Legacy Civic Portals
+Field analyses of municipal ticketing and reporting platforms reveal four core structural failure modes:
+1. **Reporting Friction:** Portals require extensive multi-step forms, ward and administrative department selection, and lengthy narrative descriptions. This administrative burden causes over 95% of observed hazards to go unreported.
+2. **Data Smog and Mislabeled Submissions:** Portals are inundated with irrelevant, non-civic photos (e.g., indoor photography, vehicle sales, social media screenshots, and accidental uploads). Human triage teams spend significant operational hours filtering non-actionable complaints.
+3. **The Quota Bottleneck of Cloud Vision APIs:** Earlier iterations of automated triage relied entirely on centralized multimodal APIs (e.g., Google Gemini 2.5 Flash). While functional in isolated testing, free-tier or entry-level rate ceilings (such as 5 to 15 Requests Per Minute and 20 to 1,500 Requests Per Day) create a hard operational ceiling, rendering cloud-only vision unviable during peak field reporting.
+4. **Resolution Fraud and Unverified Claims:** When civic participation is gamified with points or credits, malicious actors exploit systems by submitting duplicate photos, stock images, or photos taken miles away from the target hazard. Furthermore, public works departments often mark work orders as "Resolved" without verifiable physical proof.
+
+### 2.3 The CivicGuard Value Proposition
+CivicGuard re-engineers the municipal reporting workflow into an autonomous, closed-loop pipeline:
 
 ```
 +---------------------------------------------------------------------------------------------------+
-|                                 CIVICGUARD ARCHITECTURAL VALUE PROPOSITION                         |
+|                                 ARCHITECTURAL VALUE PROPOSITION                                   |
 +--------------------------+-----------------------------------+------------------------------------+
 | Traditional Civic Portals| Early AI Prototypes (API-Only)    | CivicGuard Cloud-Native (Current)  |
 +--------------------------+-----------------------------------+------------------------------------+
 | Manual department lookup | 100% Cloud API Vision calls       | On-Device Edge AI + Cloud Fallback |
-| High human triage burden | Hard daily API limits (20 req/day)| 14,400+ reports/day throughput     |
+| High human triage burden | Hard daily API limits (20-1500/day| Edge offload with text LLM fallback|
 | Vulnerable to photo spam | Vulnerable to duplicate fraud     | 4-Stage Forensic Verification      |
 | Monolithic / VPS hosting | High per-call LLM expenses        | 100% AWS Serverless Native         |
-| No offline capability    | Fails on cellular dropouts        | IndexedDB Offline Replay Engine    |
+| No offline capability    | Fails on cellular dropouts        | IndexedDB Auto-Replay Engine       |
 +--------------------------+-----------------------------------+------------------------------------+
 ```
 
 ---
 
-# 2. End-to-End System Overview & Feature Catalog
+# 3. Description & System Architecture (with Visual Evidence & Screenshots)
 
-CivicGuard is composed of seven tightly decoupled subsystems engineered for fault tolerance, instantaneous UI response, and rigorous data integrity:
+### 3.1 High-Level Architecture Topology
+The CivicGuard architecture is decoupled into seven distinct tiers operating across client runtimes, AWS serverless managed services, and cloud intelligence providers:
 
 ```mermaid
 graph TD
-    subgraph Client ["Client Interface (Next.js 16 + PWA)"]
-        A[Citizen Camera / File Drop] --> B[WASM Edge Classifier - civic_int8.onnx]
-        B -->|Live Feedback Badge| C[Interactive Dashboard / Map]
-        A -->|Offline Mode| D[IndexedDB Local Queue]
+    subgraph ClientLayer ["Client Layer (Browser Runtime: Next.js 16 + React 19)"]
+        UI[Citizen Dashboard / Map Interface]
+        CAM[Hardware Camera / Dropzone Capture]
+        WASM[onnxruntime-web: civic_int8.onnx]
+        IDB[(IndexedDB Localforage Queue)]
     end
 
-    subgraph AuthAWS ["Identity & Access (AWS Cognito)"]
-        E[Google OAuth 2.0] <--> F[Cognito User Pool ap-south-1_QOD15h5ZS]
-        F --> G[JWT Tokens: id_token, access_token]
+    subgraph AuthLayer ["Identity & Access (AWS Cognito ap-south-1)"]
+        COG[Cognito User Pool ap-south-1_QOD15h5ZS]
+        GOOG[Google OAuth 2.0 IdP]
+        JWT[HttpOnly Session Cookies]
     end
 
-    subgraph StorageAWS ["Object Storage (Amazon S3)"]
-        H[S3 Presigned Ingestion - 60s Expiry] --> I[(civicpulse-hazard-uploads)]
+    subgraph IngestionLayer ["Direct Media Offload (Amazon S3)"]
+        PRESIGN["POST /api/upload (60s Presigned URL)"]
+        S3[(civicpulse-hazard-uploads)]
     end
 
-    subgraph ComputeAWS ["Application Compute (AWS Amplify SSR)"]
-        J["/api/upload"]
-        K["/api/report"]
-        L["/api/verify"]
-        M["/api/insights"]
+    subgraph ComputeLayer ["Serverless Compute (AWS Amplify SSR)"]
+        R_REP["POST /api/report (AI Triage & Ingestion)"]
+        R_VER["POST /api/verify (4-Stage Verification)"]
+        R_INS["GET /api/insights (City Health ISR)"]
+        R_DEL["DELETE /api/report/[id]"]
     end
 
-    subgraph DatabaseAWS ["NoSQL Database (Amazon DynamoDB)"]
-        N[(CivicPulseReports Table)]
-        O[(CivicPulseProfiles Table)]
+    subgraph DBLayer ["NoSQL Persistence (Amazon DynamoDB)"]
+        DDB_REP[("CivicPulseReports Table")]
+        DDB_PROF[("CivicPulseProfiles Table")]
     end
 
-    subgraph IntelligenceCloud ["Cloud Intelligence Layer"]
-        P[Google Gemini 2.5 Flash]
-        Q[Groq Llama 3.2 Vision / Instant]
+    subgraph AICloudLayer ["Cloud Intelligence Fallback"]
+        GEMINI[Google Gemini 2.5 Flash]
+        GROQ[Groq Cloud: GPT-OSS-120B / Qwen-3.6-27B / Llama-3.1-8B]
     end
 
-    Client --> AuthAWS
-    Client --> ComputeAWS
-    ComputeAWS <--> StorageAWS
-    ComputeAWS <--> DatabaseAWS
-    ComputeAWS <--> IntelligenceCloud
+    CAM --> WASM
+    CAM -->|Offline Mode| IDB
+    IDB -.->|On Reconnection| PRESIGN
+    WASM -->|Inferred Result + Image| PRESIGN
+    PRESIGN -->|Presigned PUT URL| S3
+    S3 -.->|imageKey + metadata| R_REP
+    UI <--> AuthLayer
+    R_REP <--> DDB_REP
+    R_REP <--> DDB_PROF
+    R_VER <--> DDB_REP
+    R_VER <--> DDB_PROF
+    R_REP -.->|Ambiguous Cases| AICloudLayer
+    R_VER -.->|Stage 4 Forensics| AICloudLayer
+    R_INS <--> DDB_REP
+    R_INS -.-> AICloudLayer
 ```
 
-### Feature Catalog Matrix
-1. **Device-Aware Media Capture:** Adaptive desktop drag-and-drop zone with SVG micro-interactions; switches seamlessly on mobile viewports to native hardware camera triggers (`capture="environment"`).
-2. **On-Device Real-Time Classification:** Real-time INT8 quantized inference directly in browser runtime; renders dynamic confidence match badges before network egress.
-3. **Presigned Cloud Offloading:** Direct client-to-S3 media streaming via short-lived AWS SDK v3 presigned PUT URLs, preventing megabyte-scale payload exhaustion on serverless lambdas.
-4. **Autonomous Fraud Filtering:** Rejection of non-civic photos, stock imagery, watermarked files, computer monitor moiré patterns, and indoor scenes. Rejected images are immediately deleted from S3 via automated lifecycle commands.
-5. **Geospatial Dynamic Intelligence:** Integrated Leaflet GIS engine backed by Esri ArcGIS Dark Gray Base tiles; displays interactive incident clusters, severity color-coding, and GPS location tracking.
-6. **Time-Lapse City Replay:** Interactive chronological timeline slider allowing municipal supervisors to scrub across months of infrastructure defect submissions and resolution events.
-7. **Offline-First Background Replay Engine:** Automatic serialization of binary imagery and GPS coordinates into IndexedDB when connectivity drops; automatically flushes the queue upon network re-establishment with retry-exhaustion guards.
-8. **Automated Forensic Verification Loop:** Multi-image comparative inspection proving physical municipal remediation before releasing gamification rewards.
-9. **Tamper-Proof Civic Gamification:** Server-side atomic point accumulation (+10 for verified reports, +50 for verified fixes) backed by DynamoDB atomic update expressions.
-10. **Automated City Health Intelligence:** Automated hourly municipal insight generation aggregating infrastructure trends (`improving`, `stable`, `degrading`) with prioritized actionable recommendations.
+### 3.2 End-to-End Incident Lifecycle
+1. **Capture & Edge Triage:** The citizen captures an image. Within the browser, `onnxruntime-web` feeds a normalized $[1, 3, 224, 224]$ tensor into `civic_int8.onnx`. If classified as `not_a_hazard` with confidence $\ge 0.90$, the submission is flagged or halted immediately. If classified as a recognized hazard (`pothole`, `garbage_dump`, `waterlogging`) with confidence $\ge 0.70$, the UI displays an instant match badge.
+2. **Presigned S3 Streaming:** The client requests a 60-second presigned upload URL from `/api/upload`, streaming raw binary media directly to Amazon S3 bucket `civicpulse-hazard-uploads` under the key prefix `hazards/${timestamp}-${filename}`.
+3. **Backend Ingestion & Triage Verification:** The client posts metadata (`imageUrl`, `imageKey`, `latitude`, `longitude`, and client inference results) to `/api/report`. The backend attempts server-side validation; if server-side native ONNX runtime is absent (as in pruned serverless runtimes), it validates the forwarded client classification. If unclassified or ambiguous, it evaluates the image via Google Gemini 2.5 Flash with fallback to Groq Qwen-3.6-27b.
+4. **Persistence & Atomic Gamification:** Upon successful validation, the record is inserted into DynamoDB table `CivicPulseReports`. Concurrently, an atomic `UpdateCommand` on `CivicPulseProfiles` grants the user $+10$ civic points. If rejected by AI, the uploaded asset is purged from S3 via `DeleteObjectCommand`.
+5. **Geospatial Mapping & Real-Time Visualization:** Leaflet GIS queries `/api/reports`, plotting markers over Esri ArcGIS Dark Gray Base tiles with clustering, dynamic heatmap intensity, and time-lapse replay controls.
+6. **4-Stage Verification Loop:** Another citizen visits the site and uploads a repair proof. `/api/verify` enforces GPS proximity ($<50\text{ m}$), pHash duplicate guard ($D_H > 5$), negative classifier testing, and multi-modal AI forensic analysis. If confirmed, the status updates to `Resolved` and the verifier receives $+50$ civic points.
 
 ---
 
-# 3. The Custom Fine-Tuned Edge AI Model (YOLO11n-cls INT8)
+### 3.3 Visual Evidence & Screenshot Manifest (Exhibits 1–6)
+
+Below are the designated visual exhibit slots representing the running application interface and the underlying AWS cloud infrastructure.
+
+```
++---------------------------------------------------------------------------------------------------+
+| EXHIBIT 1: LIVE GEOSPATIAL CITIZEN DASHBOARD & INCIDENT FEED                                      |
+|                                                                                                   |
+| [ PLACEHOLDER: Full-screen capture of the running CivicGuard dashboard ]                          |
+| - URL: https://main.d3h94wzgibv55q.amplifyapp.com/dashboard (or http://localhost:3000/dashboard)   |
+| - Demonstrates: Leaflet map with Esri ArcGIS World Dark Gray Base tiles, cluster pins,            |
+|   severity color codes (Teal=Low, Amber=Medium, Red=Critical, Emerald=Resolved),                  |
+|   incident list cards, and authenticated user civic points badge in top header.                   |
++---------------------------------------------------------------------------------------------------+
+```
+*(Insert your running dashboard screenshot above)*
+
+```
++---------------------------------------------------------------------------------------------------+
+| EXHIBIT 2: ON-DEVICE EDGE AI CAMERA CAPTURE & REAL-TIME INFERENCE                                |
+|                                                                                                   |
+| [ PLACEHOLDER: Screenshot of the report modal displaying real-time edge AI triage badge ]        |
+| - Demonstrates: An uploaded pothole or garbage photo displaying the live badge:                   |
+|   "On-Device AI: Pothole (94.2% match) • Action: Accept • Severity: Medium"                       |
+| - Proves: Client-side onnxruntime-web execution of civic_int8.onnx prior to submission.           |
++---------------------------------------------------------------------------------------------------+
+```
+*(Insert your edge AI inference capture above)*
+
+```
++---------------------------------------------------------------------------------------------------+
+| EXHIBIT 3: 4-STAGE FORENSIC RESOLUTION VERIFICATION MODAL                                         |
+|                                                                                                   |
+| [ PLACEHOLDER: Screenshot of the repair verification modal showing comparative verification ]     |
+| - Demonstrates: Image A (Original Incident) side-by-side with Image B (Resolution Proof),         |
+|   the Haversine GPS distance indicator, and the certified resolution toast (+50 Points).          |
++---------------------------------------------------------------------------------------------------+
+```
+*(Insert your forensic resolution verification screenshot above)*
+
+```
++---------------------------------------------------------------------------------------------------+
+| EXHIBIT 4: AWS AMPLIFY HOSTING CONSOLE & DEPLOYMENT PIPELINE                                      |
+|                                                                                                   |
+| [ PLACEHOLDER: AWS Management Console -> AWS Amplify -> App: AWS-project (d3h94wzgibv55q) ]       |
+| - Region: ap-south-1 (Mumbai)                                                                     |
+| - Demonstrates: Successful build status, branch 'main', custom domain/app URL, and                |
+|   build logs reflecting the amplify.yml execution and binary pruning steps.                       |
++---------------------------------------------------------------------------------------------------+
+```
+*(Insert your AWS Amplify Management Console screenshot above)*
+
+```
++---------------------------------------------------------------------------------------------------+
+| EXHIBIT 5: AMAZON DYNAMODB ITEM EXPLORER (CivicPulseReports & CivicPulseProfiles)                 |
+|                                                                                                   |
+| [ PLACEHOLDER: AWS Management Console -> Amazon DynamoDB -> Tables -> Item Explorer ]            |
+| - Region: ap-south-1                                                                              |
+| - Demonstrates: Items in 'CivicPulseReports' showing UUID keys, latitude, longitude,              |
+|   category, severity_score, image_url, status='Reported'/'Resolved', and                          |
+|   'CivicPulseProfiles' showing Cognito sub keys with atomic point counters.                       |
++---------------------------------------------------------------------------------------------------+
+```
+*(Insert your Amazon DynamoDB console screenshot above)*
+
+```
++---------------------------------------------------------------------------------------------------+
+| EXHIBIT 6: AWS COGNITO USER POOL & GOOGLE IDENTITY PROVIDER CONFIGURATION                         |
+|                                                                                                   |
+| [ PLACEHOLDER: AWS Management Console -> Amazon Cognito -> User Pools -> ap-south-1_QOD15h5ZS ]   |
+| - Region: ap-south-1                                                                              |
+| - Demonstrates: App client '5367n3jeafigqt9k3u2ifc01jd', Auth Domain                              |
+|   'civicguard-auth-8958.auth.ap-south-1.amazoncognito.com', and Google Federated Identity Provider.|
++---------------------------------------------------------------------------------------------------+
+```
+*(Insert your AWS Cognito User Pool console screenshot above)*
+
+---
+
+# 4. Sample Code: Core Concepts & Implementation
+
+This section provides concise, verified code excerpts extracted directly from the CivicGuard production codebase, detailing the critical mechanisms of the system.
+
+### 4.1 In-Browser WebAssembly Classifier (`lib/client-classifier.ts`)
+Executes real-time, zero-server-cost classification directly within the client's browser using `onnxruntime-web`:
+
+```typescript
+// Excerpt from: civic-guard/lib/client-classifier.ts
+export const CLASSES = ["garbage_dump", "not_a_hazard", "pothole", "waterlogging"] as const;
+export type ClassName = (typeof CLASSES)[number];
+
+const REJECT_THRESHOLD = 0.90;
+const ACCEPT_THRESHOLD = 0.70;
+
+async function getInferenceSession() {
+  if (typeof window === "undefined") return null;
+  if (!sessionPromise) {
+    sessionPromise = (async () => {
+      const ort = await import("onnxruntime-web");
+      ort.env.wasm.wasmPaths = "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.31.1/dist/";
+      ort.env.wasm.numThreads = 1;
+
+      const session = await ort.InferenceSession.create("/models/civic_int8.onnx", {
+        executionProviders: ["wasm"],
+        graphOptimizationLevel: "all",
+      });
+      return { ort, session };
+    })();
+  }
+  return sessionPromise;
+}
+
+export async function classifyImageInBrowser(imageSrc: string): Promise<ClientClassificationResult | null> {
+  const initialized = await getInferenceSession();
+  if (!initialized) return null;
+  const { ort, session } = initialized;
+
+  const float32Data = await preprocessImage(imageSrc); // Transforms HWC [0,255] to CHW [0,1]
+  const inputTensor = new ort.Tensor("float32", float32Data, [1, 3, 224, 224]);
+  const results = await session.run({ [session.inputNames[0]]: inputTensor });
+  const outputData = results[session.outputNames[0]].data as Float32Array;
+
+  // Derive class probabilities, action, and severity
+  let action: "accept" | "reject" | "escalate" = "escalate";
+  let severity = 3;
+  if (bestLabel === "not_a_hazard" && maxConfidence >= REJECT_THRESHOLD) {
+    action = "reject";
+  } else if (bestLabel !== "not_a_hazard" && maxConfidence >= ACCEPT_THRESHOLD) {
+    action = "accept";
+    if (bestLabel === "garbage_dump") severity = 2;
+    if (maxConfidence > 0.85) severity += 1; // Client-side severity heuristic
+  }
+  return { label: bestLabel, confidence: maxConfidence, probs, action, severity };
+}
+```
+
+### 4.2 Multi-Tier Ingestion & AI Triage Handler (`app/api/report/route.ts`)
+Demonstrates direct S3 media acquisition, server-side/client-side ONNX verification, Gemini fallback, DynamoDB persistence, and atomic civic point awards:
+
+```typescript
+// Excerpt from: civic-guard/app/api/report/route.ts
+export async function POST(request: NextRequest) {
+  const user = getAuthenticatedUser(request);
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const formData = await request.formData();
+  const imageKey = formData.get("imageKey") as string;
+  const lat = parseFloat(formData.get("latitude") as string);
+  const lng = parseFloat(formData.get("longitude") as string);
+
+  // Fetch binary media from S3 via AWS SDK
+  const s3Response = await s3Client.send(new GetObjectCommand({
+    Bucket: process.env.NEXT_PUBLIC_S3_BUCKET_NAME!,
+    Key: imageKey,
+  }));
+  const buffer = Buffer.from(await s3Response.Body!.transformToByteArray());
+
+  let parsed: ReportAnalysis;
+  let onnxHandled = false;
+
+  // Try server-side ONNX or validate client-forwarded WASM inference
+  const clientAction = formData.get("onnxAction") as string;
+  const clientLabel = formData.get("onnxLabel") as string;
+  const clientConfidence = parseFloat(formData.get("onnxConfidence") as string || "0");
+  const clientSeverity = parseInt(formData.get("onnxSeverity") as string || "3", 10);
+
+  if (clientAction === "accept" && clientLabel && clientConfidence >= 0.70) {
+    const { describeReport } = await import("@/lib/describe");
+    const desc = await describeReport({ label: clientLabel, severity: clientSeverity, latitude: lat, longitude: lng });
+    parsed = { isAuthentic: true, category: clientLabel, title: `${clientLabel.toUpperCase()} Report`, description: desc, severity: "Medium" };
+    onnxHandled = true;
+  }
+
+  // Fallback to Cloud Multimodal AI if unhandled
+  if (!onnxHandled) {
+    const { analyzeCivicIssue } = await import("@/lib/ai-router");
+    parsed = await analyzeCivicIssue(buffer, s3Response.ContentType || "image/jpeg");
+  }
+
+  if (!parsed.isAuthentic) {
+    // Purge rejected asset immediately from S3
+    await s3Client.send(new DeleteObjectCommand({ Bucket: process.env.NEXT_PUBLIC_S3_BUCKET_NAME!, Key: imageKey }));
+    return NextResponse.json({ error: parsed.fraudReason || "Rejected by AI Triage" }, { status: 400 });
+  }
+
+  // Persist incident to DynamoDB CivicPulseReports table
+  const report = {
+    id: crypto.randomUUID(),
+    title: parsed.title,
+    description: parsed.description,
+    category: parsed.category,
+    severity_score: parsed.severity === "Critical" ? 5 : parsed.severity === "Low" ? 1 : 3,
+    latitude: lat,
+    longitude: lng,
+    image_url: formData.get("imageUrl") as string,
+    status: "Reported",
+    user_id: user.id,
+    created_at: new Date().toISOString(),
+  };
+
+  await docClient.send(new PutCommand({ TableName: REPORTS_TABLE, Item: report }));
+
+  // Atomically increment user points (+10) in DynamoDB CivicPulseProfiles table
+  await docClient.send(new UpdateCommand({
+    TableName: PROFILES_TABLE,
+    Key: { id: user.id },
+    UpdateExpression: "ADD points :pts",
+    ExpressionAttributeValues: { ":pts": 10 },
+  }));
+
+  return NextResponse.json({ report }, { status: 201 });
+}
+```
+
+### 4.3 4-Stage Autonomous Forensic Verification Gateway (`app/api/verify/route.ts`)
+Demonstrates Haversine spatial gating ($d \le 50\text{ m}$), perceptual hash duplicate detection ($D_H \le 5$), classifier verification ($\ge 0.80$), and multimodal visual analysis:
+
+```typescript
+// Excerpt from: civic-guard/app/api/verify/route.ts
+// STAGE 1: Spatial Gating via Haversine Formula (< 50 meters)
+const distanceMeters = haversineDistance(report.latitude, report.longitude, userLat, userLng);
+if (distanceMeters > 50) {
+  return NextResponse.json({
+    status: "rejected",
+    reason: "Verification failed: You must be physically present at the location (<50m).",
+    distance: Math.round(distanceMeters),
+  }, { status: 403 });
+}
+
+// STAGE 2: Perceptual Hash Duplicate Guard (sharp-phash Hamming distance > 5)
+if (report.image_url) {
+  const phash = (await import("sharp-phash")).default;
+  const dist = (await import("sharp-phash/distance")).default;
+  const origResponse = await fetch(report.image_url);
+  if (origResponse.ok) {
+    const origBuffer = Buffer.from(await origResponse.arrayBuffer());
+    const [hashA, hashB] = await Promise.all([phash(origBuffer), phash(verifyBuffer)]);
+    const hammingDistance = dist(hashA, hashB);
+    if (hammingDistance <= 5) {
+      return NextResponse.json({
+        status: "rejected",
+        reason: "Duplicate image detected. Please take a new, live photo of the resolved hazard.",
+      }, { status: 403 });
+    }
+  }
+}
+
+// STAGE 3: Local AI Classifier Check (Reject if original hazard still detected >= 0.80)
+const { classify } = await import("@/lib/classifier");
+const classResult = await classify(verifyBuffer);
+const reportHazardClass = normalizeCategoryToClass(report.category || "");
+if (classResult.label !== "not_a_hazard" && classResult.label === reportHazardClass && classResult.confidence >= 0.80) {
+  return NextResponse.json({
+    status: "rejected",
+    reason: `Hazard still detected: The image still shows active ${classResult.label}.`,
+  }, { status: 400 });
+}
+
+// STAGE 4: Multi-Modal Visual Forensics via ai-router (Groq GPT-OSS-120b -> Qwen -> Gemini)
+const { verifyRepairCompletion } = await import("@/lib/ai-router");
+const verification = await verifyRepairCompletion(origBase64, origMime, verifyBuffer, verifyMime, report.category, report.title, report.description);
+if (!verification.is_same_location || !verification.is_resolved) {
+  return NextResponse.json({ status: "rejected", reason: `Resolution rejected: ${verification.reasoning}` }, { status: 403 });
+}
+
+// Mark Resolved & Atomically Award +50 Civic Points
+await docClient.send(new UpdateCommand({
+  TableName: REPORTS_TABLE,
+  Key: { id: reportId },
+  UpdateExpression: "SET #st = :resolved, resolved_image_url = :img, resolved_at = :time",
+  ExpressionAttributeNames: { "#st": "status" },
+  ExpressionAttributeValues: { ":resolved": "Resolved", ":img": imageUrl, ":time": new Date().toISOString() },
+}));
+await docClient.send(new UpdateCommand({
+  TableName: PROFILES_TABLE,
+  Key: { id: user.id },
+  UpdateExpression: "ADD points :pts",
+  ExpressionAttributeValues: { ":pts": 50 },
+}));
+```
+
+### 4.4 Offline-First Sync & Self-Healing Replay Engine (`hooks/useBackgroundSync.ts`)
+Demonstrates network event binding, direct client-to-S3 uploading, and eviction logic for HTTP 400 rejections and HTTP 401 unauthenticated states:
+
+```typescript
+// Excerpt from: civic-guard/hooks/useBackgroundSync.ts
+for (const key of reportKeys) {
+  const payload = await localforage.getItem<OfflineReportPayload>(key);
+  if (!payload) continue;
+
+  // 1. Fetch S3 Presigned PUT URL
+  const uploadRes = await fetch("/api/upload", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ filename: file.name, contentType: file.type }),
+  });
+  const { uploadUrl, finalImageUrl, key: imageKey } = await uploadRes.json();
+
+  // 2. Direct binary PUT streaming to Amazon S3
+  await fetch(uploadUrl, { method: "PUT", headers: { "Content-Type": file.type }, body: file });
+
+  // 3. Post to backend ingestion
+  const res = await fetch("/api/report", { method: "POST", body: formData });
+
+  if (res.ok) {
+    await localforage.removeItem(key);
+    syncedCount++;
+  } else if (res.status === 401) {
+    // Unauthenticated: Pause queue so citizen can log in; do NOT discard
+    onToast({ message: "Please sign in to sync your offline report.", type: "error" });
+    break;
+  } else if (res.status === 400) {
+    // AI Rejection: Evict immediately from IndexedDB to eliminate 30-minute retry loops!
+    await localforage.removeItem(key);
+    onToast({ message: `Offline report rejected: ${errData.error}`, type: "error" });
+  } else {
+    // Server 5xx: Increment retry count, discard after 5 failed attempts
+    payload.retryCount = (payload.retryCount || 0) + 1;
+    if (payload.retryCount > 5) await localforage.removeItem(key);
+    else await localforage.setItem(key, payload);
+    break;
+  }
+}
+```
+
+### 4.5 Amazon S3 Presigned URL Media Ingestion (`app/api/upload/route.ts`)
+Demonstrates generation of 60-second presigned PUT URLs via `@aws-sdk/s3-request-presigner`:
+
+```typescript
+// Excerpt from: civic-guard/app/api/upload/route.ts
+export async function POST(request: NextRequest) {
+  const { filename, contentType } = await request.json();
+  const key = `hazards/${Date.now()}-${filename}`;
+
+  const command = new PutObjectCommand({
+    Bucket: process.env.NEXT_PUBLIC_S3_BUCKET_NAME!,
+    Key: key,
+    ContentType: contentType,
+  });
+
+  const uploadUrl = await getSignedUrl(s3Client, command, { expiresIn: 60 });
+  const awsRegion = process.env.APP_AWS_REGION || process.env.AWS_REGION || "ap-south-1";
+  const finalImageUrl = `https://${process.env.NEXT_PUBLIC_S3_BUCKET_NAME}.s3.${awsRegion}.amazonaws.com/${key}`;
+
+  return NextResponse.json({ uploadUrl, finalImageUrl, key });
+}
+```
+
+### 4.6 Server-Side Cognito Session Management (`lib/server-auth.ts` & `app/api/auth/token/route.ts`)
+Demonstrates server-to-server OAuth 2.0 authorization code exchange with Cognito and secure cookie issuance:
+
+```typescript
+// Excerpt from: civic-guard/app/api/auth/token/route.ts
+const tokenUrl = `https://${COGNITO_CONFIG.domain}/oauth2/token`;
+const tokenRes = await fetch(tokenUrl, {
+  method: "POST",
+  headers: { "Content-Type": "application/x-www-form-urlencoded" },
+  body: new URLSearchParams({
+    grant_type: "authorization_code",
+    client_id: COGNITO_CONFIG.clientId,
+    code,
+    redirect_uri: redirectUri,
+  }).toString(),
+});
+const tokenData = await tokenRes.json();
+const payload = parseJwtPayload(tokenData.id_token);
+
+// Issue secure HTTP-only session cookie
+response.cookies.set("cognito_id_token", tokenData.id_token, {
+  path: "/",
+  maxAge: tokenData.expires_in || 3600,
+  sameSite: "lax",
+  secure: process.env.NODE_ENV === "production",
+  httpOnly: true,
+});
+response.cookies.set("cognito_user_id", payload.sub, {
+  path: "/",
+  maxAge: tokenData.expires_in || 3600,
+  sameSite: "lax",
+  secure: process.env.NODE_ENV === "production",
+  httpOnly: false, // Accessible to client for user identification
+});
+```
+
+### 4.7 DynamoDB Document Client Configuration (`lib/dynamodb.ts`)
+Demonstrates DocumentClient initialization with marshaling rules:
+
+```typescript
+// Excerpt from: civic-guard/lib/dynamodb.ts
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
+
+const region = process.env.APP_AWS_REGION || process.env.AWS_REGION || "ap-south-1";
+const ddbClient = new DynamoDBClient({
+  region,
+  credentials: {
+    accessKeyId: process.env.APP_AWS_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.APP_AWS_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY!,
+  },
+});
+
+export const docClient = DynamoDBDocumentClient.from(ddbClient, {
+  marshallOptions: { removeUndefinedValues: true },
+});
+export const REPORTS_TABLE = "CivicPulseReports";
+export const PROFILES_TABLE = "CivicPulseProfiles";
+```
+
+### 4.8 Amplify SSR Build Specification & Binary Pruning (`amplify.yml`)
+Demonstrates post-build pruning of heavy native C++ binaries to maintain compliance with AWS Amplify's strict 220 MB serverless compute bundle ceiling:
+
+```yaml
+# Excerpt from: amplify.yml
+version: 1
+applications:
+  - appRoot: civic-guard
+    frontend:
+      phases:
+        preBuild:
+          commands:
+            - nvm use 20 || nvm install 20
+            - env | grep -E '^(NEXT_PUBLIC_|APP_AWS_|AWS_|GEMINI_|GROQ_|DYNAMODB_)' > .env.production || true
+            - npm ci
+        build:
+          commands:
+            - env | grep -E '^(NEXT_PUBLIC_|APP_AWS_|AWS_|GEMINI_|GROQ_|DYNAMODB_)' > .env.production || true
+            - npm run build
+            # Strip cache and heavy build-time packages to meet AWS Amplify 220 MB limit
+            - rm -rf .next/cache || true
+            - rm -rf .next/standalone || true
+            - rm -rf node_modules/onnxruntime-node || true
+            - rm -rf node_modules/typescript || true
+            - rm -rf node_modules/@types || true
+            - rm -rf node_modules/@next/swc* || true
+            - rm -rf node_modules/eslint* || true
+      artifacts:
+        baseDirectory: .next
+        files:
+          - '**/*'
+```
+
+---
+
+# 5. The Custom Fine-Tuned Edge AI Model (YOLO11n-cls INT8)
 
 ```
 ========================================================================================
-                               MODEL CARD: civic_int8.onnx
+                                MODEL CARD: civic_int8.onnx
 ========================================================================================
 Architecture:              YOLO11n-cls (Ultralytics Nano Classifier)
 Parameters:                1,531,148
@@ -158,28 +650,16 @@ Computational Complexity:  3.2 GFLOPs
 Input Tensor:              [1, 3, 224, 224] Float32, Planar CHW Normalized [0, 1]
 Output Tensor:             [1, 4] Float32 Softmax Probabilities
 Artifact Size:             1.6 MB (Quantized INT8 ONNX)
-Target Runtimes:           onnxruntime-web (WebAssembly), onnxruntime-node
+Target Runtimes:           onnxruntime-web (WebAssembly), onnxruntime-node (Dev)
 Inference Latency:         0.4 ms (NVIDIA T4), 38-52 ms (Apple Silicon WASM), 65 ms (Mobile)
 Classes (Alphabetical):    0: garbage_dump, 1: not_a_hazard, 2: pothole, 3: waterlogging
 ========================================================================================
 ```
 
-### 3.1 The Quota Crisis & Motivation
-In early architectural iterations, every submitted photo was sent directly to a cloud multi-modal Vision API (Google Gemini 2.5 Flash) to answer two fundamental questions:
-1. *Is this a genuine civic infrastructure hazard, or is it irrelevant spam?*
-2. *What is the severity of the defect on a standardized 1 to 5 scale?*
-
-While functional in local testing, production evaluation revealed severe operational constraints on the free tier:
-* **Requests Per Minute (RPM):** 5
-* **Requests Per Day (RPD):** 20
-* **Tokens Per Minute (TPM):** 200,000
-
-With a ceiling of **20 requests per day**, twenty citizens reporting potholes in the morning would completely disable the entire city platform for the remainder of the 24-hour cycle. To build a resilient civic system without high variable billing costs, an autonomous on-device model was conceived. The custom model acts as the primary triage authority; cloud multi-modal vision APIs are invoked solely for high-ambiguity edge cases.
-
-### 3.2 Architecture Selection: YOLO11n-cls vs. Alternatives
-A critical design decision was made between **Object Detection** (bounding boxes) and **Image Classification**:
-* *Why Classification?* Municipal triage workflows only require knowing *what* defect is present in the image and whether it is authentic. Localizing the exact pixel bounding box of a pothole is unnecessary for dispatching a repair crew. Furthermore, detection models require orders of magnitude more compute (e.g., 15+ GFLOPs vs. 3.2 GFLOPs) and would require thousands of manual bounding-box annotations.
-* *Why YOLO11n-cls?* With only **1,531,148 parameters**, Ultralytics' Nano classification variant provided the optimal Pareto frontier: ultra-low parameter count, single-line ONNX export, native support for post-training quantization, and a runtime size small enough to download over cellular connections in under 1 second.
+### 5.1 Architecture Justification & Parameter Profile
+A foundational architectural objective was eliminating server-side vision costs for typical reports. The choice of neural architecture was governed by strict operational parameters:
+* **Object Detection vs. Classification:** Detection architectures (e.g., YOLOv8-det, Faster R-CNN) predict bounding box coordinates. For municipal routing, predicting the bounding box of a pothole is unnecessary; the municipal team only requires knowing the *type* of defect and its severity. Detection models require significantly more compute (15+ GFLOPs vs. 3.2 GFLOPs) and produce larger model files.
+* **Selection of YOLO11n-cls:** With **1,531,148 parameters**, Ultralytics' YOLO11 Nano classification variant delivers an optimal balance of parameter efficiency, single-step ONNX export, and an INT8 runtime footprint of only **1.6 MB**, allowing rapid distribution over mobile cellular networks.
 
 ```
 +---------------------------------------------------------------------------------------+
@@ -195,14 +675,14 @@ A critical design decision was made between **Object Detection** (bounding boxes
 +-----------------------+-------------------+----------------+-------------+------------+
 ```
 
-### 3.3 Dataset Provenance, Label Reconstruction & Curation
-The training corpus was assembled across four distinct research repositories and augmented with negative scene imagery, totaling **~6,300 curated images**:
+### 5.2 Multi-Source Dataset Provenance & Label Reconstruction
+The training corpus comprises **6,298 images** assembled across distinct datasets:
 
 ```
 +---------------------------------------------------------------------------------------+
 |                              DATASET PROVENANCE BREAKDOWN                             |
 +-----------------+---------------+--------+--------------------------------------------+
-| Class Name      | Source ID     | Count  | Provenance / Dataset Details               |
+| Class Name      | Source Prefix | Count  | Provenance / Dataset Details               |
 +-----------------+---------------+--------+--------------------------------------------+
 | pothole         | India_ / gt_  | 1,600  | 500 from RDD2022 India (dashcam crops) +   |
 |                 |               |        | 1,100 from Georgia Tech Roboflow close-ups |
@@ -212,37 +692,33 @@ The training corpus was assembled across four distinct research repositories and
 +-----------------+---------------+--------+--------------------------------------------+
 | waterlogging    | wl_           | 1,400  | Roboflow Indian urban monsoon flood photos |
 +-----------------+---------------+--------+--------------------------------------------+
-| garbage_dump    | wa_ / gb_     | 798    | 720 street-level WhatsApp community photos |
-|                 |               |        | + 215 municipal landfill open-dumps        |
+| garbage_dump    | wa_ / gb_     | 798    | Street-level WhatsApp community photos     |
+|                 |               |        | + municipal open waste dump photos         |
 +-----------------+---------------+--------+--------------------------------------------+
 | TOTAL CORPUS    |               | 6,298  | Multi-Source Curated Dataset               |
 +-----------------+---------------+--------+--------------------------------------------+
 ```
 
-#### The RDD2022 Reverse-Engineering Breakthrough
-A major hurdle occurred when importing **RDD2022 (Road Damage Detection 2022)**, a 9.9 GB dataset of Indian road imagery downloaded via KaggleHub. The dataset shipped in raw YOLO format where labels were serialized purely as integers (`0, 1, 2, 3, 4`) lacking a defining `data.yaml`. The standardized RDD taxonomy (e.g., `D00, D10, D20, D40`) did not map to this five-class configuration.
-
-Rather than trusting unverified annotations, an automated Python visual auditing script extracted and cropped 200 samples per class ID. Manual visual inspection revealed:
-* `0`: Longitudinal cracking along the asphalt seam.
-* `1`: Transverse cracking (only 50 sparse samples; discarded as statistically non-viable).
-* `2`: Road repair patches (already asphalted; non-hazardous).
-* `3`: Contaminated pavement / road markings.
+#### The RDD2022 Reverse-Engineering Audit
+The Road Damage Detection 2022 (RDD2022) Indian subset was downloaded via KaggleHub (9.9 GB). Raw annotations contained integer labels (`0, 1, 2, 3, 4`) lacking a formal taxonomy file. A Python visual inspection script extracted 200 samples per class ID:
+* `0`: Longitudinal cracking.
+* `1`: Transverse cracking (only 50 samples; discarded due to sample scarcity).
+* `2`: Road repair patches (already repaired; non-hazardous).
+* `3`: Contaminated pavement markings.
 * `4`: **Potholes** (2,236 robust samples).
 
-*Decision:* Class `4` was isolated as the definitive pothole ground truth. Classes `1`, `2`, and `3` were purged to prevent label corruption. Class `0` (`road_crack`) was initially evaluated as a fifth class, but discarded after visual audits proved that 224×224 downsampling rendered narrow road fissures indistinguishable from asphalt noise.
+*Engineering Decision:* Class `4` was isolated as the pothole ground truth. Classes `1`, `2`, and `3` were purged. Class `0` (`road_crack`) was initially considered as a 5th class, but was discarded after visual audits proved that 224×224 downsampling rendered narrow road fissures visually indistinguishable from asphalt grain noise.
 
-### 3.4 Preprocessing, Noise Filtering & Grouped Splitting
-To prepare bounding-box datasets for classification, an automated pipeline cropped bounding coordinates into standalone images:
-1. **The 60-Pixel Minimum Dimension Filter:** Over 60% of raw bounding-box annotations in public road datasets were tiny artifacts under 60×60 pixels. When resized to 224×224, they degraded into unreadable grey smears. An absolute threshold was enforced: `min(width, height) >= 60px`.
-2. **Automated Clean Negative Extraction:** The cropping script cut random 224×224 patches from *undamaged* zones of the RDD road images. These negatives share identical sensor optical properties, white balance, and lens distortion as the positive pothole crops, forcing the model to learn structural damage rather than camera sensor signatures.
-3. **Source Prefixing:** Every file was encoded with a strict origin prefix (`India_`, `gt_`, `wl_`, `wa_`, `gb_`, `junk_`, `pl_`). This enabled granular error tracing across source pipelines.
-4. **Grouped Splitting (Zero Data Leakage):** Standard random train/val/test splits cause severe data leakage when multiple crops originate from the same high-resolution dashcam photograph. CivicGuard grouped crops by parent photograph UUID before shuffling:
+### 5.3 Preprocessing, Quality Filtering & Grouped Splitting
+1. **The 60-Pixel Minimum Dimension Filter:** Over 60% of raw bounding-box annotations in public road datasets were tiny artifacts under $60\times 60$ pixels. When stretched to $224\times 224$, they degraded into unreadable blur. A strict filter was applied: $\min(\text{width}, \text{height}) \ge 60\text{ px}$.
+2. **Clean Negative Extraction:** Automated crops were cut from *undamaged* sections of RDD dashcam frames. These negatives share identical sensor optical properties, white balance, and road textures with the positive pothole crops, compelling the network to learn damage morphology rather than camera sensor signatures.
+3. **Grouped Splitting (Zero Image Leakage):** Standard random splitting causes severe data leakage when multiple crops originate from the same parent high-resolution photograph. CivicGuard grouped crops by parent photograph UUID before splitting:
    $$\text{Overlap}(\text{Train}, \text{Val}) = 0, \quad \text{Overlap}(\text{Train}, \text{Test}) = 0, \quad \text{Overlap}(\text{Val}, \text{Test}) = 0$$
 
-### 3.5 Training Regimen, Baselines & Benchmarking
+### 5.4 Training Regimen, Baselines & Benchmarking
 Training was executed on a cloud-hosted NVIDIA Tesla T4 GPU (16 GB VRAM) utilizing PyTorch 2.4 and Ultralytics YOLO11:
-* **Base Architecture:** `yolo11n-cls.pt` (Pretrained ImageNet-1k weights)
-* **Image Dimensions:** $224 \times 224 \times 3$
+* **Base Checkpoint:** `yolo11n-cls.pt` (Pretrained on ImageNet-1k)
+* **Image Input Dimensions:** $224 \times 224 \times 3$
 * **Batch Size:** 64
 * **Epoch Budget:** 40 epochs with Early Stopping (`patience=10`)
 * **Optimizer:** AdamW ($\text{lr}_0 = 0.001$, weight decay = $0.0005$)
@@ -255,16 +731,16 @@ Training was executed on a cloud-hosted NVIDIA Tesla T4 GPU (16 GB VRAM) utilizi
 | Model Iteration       | Test Acc    | OOD Acc  | Artifact Size | Operational Verdict  |
 +-----------------------+-------------+----------+---------------+----------------------+
 | Majority Baseline     | 0.300       | 0.00%    | N/A           | Theoretical Floor    |
-| ResNet-18 + LogReg    | 0.963       | 40.0%    | 45.0 MB       | Too heavy for browser|
+| ResNet-18 + LogReg    | 0.963       | 40.0%    | 45.0 MB       | Excessive footprint  |
 | YOLO11n-cls (v1)      | 0.991       | 20.0%    | 6.1 MB        | Shortcut Learning!   |
-| YOLO11n-cls (v2)      | 0.978       | 60.0%    | 6.1 MB        | Partial Generalization|
-| YOLO11n-cls (v3 FP32) | 0.961       | 80.0%    | 5.9 MB (ONNX) | Honest Generalization|
+| YOLO11n-cls (v2)      | 0.978       | 60.0%    | 6.1 MB        | Partial Generaliz.   |
+| YOLO11n-cls (v3 FP32) | 0.961       | 80.0%    | 5.9 MB (ONNX) | Honest Generaliz.    |
 | YOLO11n-cls (v3 INT8) | 0.967       | 80.0%    | 1.6 MB (ONNX) | PRODUCTION STANDARD  |
 +-----------------------+-------------+----------+---------------+----------------------+
 ```
 
-### 3.6 The 99.1% Deception: Source Leakage & Out-of-Distribution Diagnosis
-Iteration 1 of the trained model achieved an extraordinary **99.1% test accuracy**. However, performing a source-stratified evaluation revealed an underlying flaw:
+### 5.5 The 99.1% Deception: Source Leakage & Out-of-Distribution Diagnosis
+Iteration 1 initially scored **99.1% test accuracy**. However, a source-stratified evaluation revealed an underlying shortcut:
 
 ```
 +---------------------------------------------------------------------------------------+
@@ -281,7 +757,7 @@ Iteration 1 of the trained model achieved an extraordinary **99.1% test accuracy
 +-----------------------+---------------------+-------------------+---------------------+
 ```
 
-Because each hazard class had been gathered from a single prominent source, the neural network was not learning the morphological structure of civic hazards; it was learning the **compression artifacts, color grading, and aspect ratios of the host datasets**. This phenomenon—**Source Leakage (Shortcut Learning)**—was unmasked when the model was evaluated against five freshly captured mobile phone photographs:
+Because each hazard class was assembled from a distinct origin, the model was learning **dataset-specific compression artifacts and aspect ratios** rather than physical hazard geometry. When tested against out-of-distribution (OOD) smartphone captures, the model achieved only **20% accuracy (1/5)**:
 
 ```
 +---------------------------------------------------------------------------------------+
@@ -296,15 +772,12 @@ Because each hazard class had been gathered from a single prominent source, the 
 | Puddle on Sidewalk  | pothole             | 1.000             | FAIL (Severe Error)   |
 +---------------------+---------------------+-------------------+-----------------------+
 ```
-A building exterior was classified as *waterlogging* with 99.8% confidence. The model had learned that high-resolution, uncompressed phone photography belonged to the urban flooding dataset.
 
-### 3.7 Dataset Remediation & Real-World Validation
-To break shortcut learning, Iteration 3 overhauled the `not_a_hazard` class:
-1. Integrated **1,800 diverse outdoor and indoor scene negatives** from the MIT **Places365** dataset (shops, facades, residential hallways, courtyards, parking lots).
-2. Added clean, undamaged asphalt captures taken across varying times of day.
-3. Retrained with cross-dataset image mixing.
-
-While the nominal test benchmark dropped from 99.1% to **96.1%**, out-of-distribution real-world phone accuracy surged from **20% to 80% (16/20 on comprehensive field captures)**. The test set had become more rigorous, and the model developed true generalized feature extraction.
+### 5.6 Dataset Remediation with Places365 Scene Negatives
+To resolve shortcut learning, Iteration 3 restructured the `not_a_hazard` class:
+1. Integrated **1,800 diverse scene negatives** from the MIT **Places365** dataset (storefronts, building facades, hallways, courtyards, parking areas).
+2. Added clean asphalt images across varying lighting and weather conditions.
+3. While the in-domain test score adjusted from 99.1% to **96.1%**, out-of-distribution real-world smartphone accuracy increased from **20% to 80% (16/20)**.
 
 ```
 +---------------------------------------------------------------------------------------+
@@ -319,20 +792,20 @@ While the nominal test benchmark dropped from 99.1% to **96.1%**, out-of-distrib
 +------------------+------------------+------------------+---------------+--------------+
 ```
 
-### 3.8 Post-Training INT8 Quantization & Model Optimization
-To deploy the trained model directly within browser clients, the PyTorch checkpoint (`best.pt`, 6.1 MB) was exported to the Open Neural Network Exchange (ONNX) format with INT8 quantization:
-
-```bash
-# Export and Quantization Script
-yolo export model=runs/classify/train/weights/best.pt format=onnx int8=True imgsz=224
-```
-* **Quantization Method:** Post-Training Static Quantization (PTQ) mapping 32-bit floating point weights ($W \in \mathbb{R}$) into signed 8-bit integers ($Q \in [-128, 127]$):
+### 5.7 Post-Training INT8 Quantization (PTQ)
+The trained PyTorch weights (`best.pt`, 6.1 MB) were exported to ONNX format with 8-bit integer quantization:
+* **Quantization Function:** Post-Training Static Quantization mapping 32-bit floats ($x \in \mathbb{R}$) to signed 8-bit integers ($q \in [-128, 127]$):
   $$q = \text{round}\left(\frac{x}{S}\right) + Z$$
-* **Size Reduction:** Slashed artifact footprint from **6.1 MB to 1.6 MB** (a **73.7% reduction**).
-* **Quantization Accuracy Impact:** Test accuracy improved slightly from **0.961 to 0.967**, caused by quantization acting as a mild regularizer against weight over-fitting.
+* **Footprint Reduction:** Model file size decreased from **6.1 MB to 1.6 MB** (a **73.7% reduction**).
+* **Test Accuracy:** 0.967, showing quantization acted as a mild regularizer against parameter over-fitting.
 
-### 3.9 Cross-Language Parity Check: Python PyTorch vs. TypeScript WebAssembly
-A critical vulnerability in edge deployment is preprocessing drift: if the browser's image tensor preparation differs from Python PIL/OpenCV, production accuracy collapses. A four-way probability parity verification was conducted between the Python baseline and the Next.js TypeScript pipeline ([`civic-guard/lib/client-classifier.ts`](file:///Users/pratyushraj/CivicGuard/civic-guard/lib/client-classifier.ts)):
+### 5.8 Cross-Language Preprocessing & Tensor Parity Proof
+To ensure that browser execution matches Python training, tensor preparation in TypeScript (`lib/client-classifier.ts`) replicates Python PIL/OpenCV behavior:
+1. Canvas rendering resizes the image to exactly $224 \times 224$ pixels via fill-stretch.
+2. Pixel channels are unpacked from interleaved HWC RGBA uint8 ($[0, 255]$) into planar CHW RGB float32 ($[0.0, 1.0]$).
+3. The resulting buffer is wrapped in an `ort.Tensor("float32", float32Data, [1, 3, 224, 224])`.
+
+A parity evaluation confirmed cross-language output alignment:
 
 ```
 +---------------------------------------------------------------------------------------+
@@ -348,13 +821,13 @@ A critical vulnerability in edge deployment is preprocessing drift: if the brows
 | PARITY VERDICT        | AGREEMENT TO FOUR DECIMAL PLACES (99.99% PROBABILITY CONVERGENCE)|
 +-----------------------+-----------------------------+---------------------------------+
 ```
-*(Minor delta in the 5th decimal place is attributable to Lanczos vs. Bilinear canvas resampling filtering).*
 
 ---
 
-# 4. Multi-Tier Hybrid AI Triage & Fallback Architecture
+# 6. Multi-Tier Hybrid AI Triage & Fallback Architecture
 
-To handle incoming reports while maintaining zero API expenditures on routine classifications, CivicGuard implements a **Three-Tier Autonomous Triage Pipeline** ([`civic-guard/app/api/report/route.ts`](file:///Users/pratyushraj/CivicGuard/civic-guard/app/api/report/route.ts)):
+### 6.1 Multi-Tier Execution Pipeline
+To manage incoming report triage without incurring unnecessary API costs, CivicGuard implements a multi-tier triage hierarchy:
 
 ```
                                     [Citizen Uploads Photo]
@@ -366,21 +839,22 @@ To handle incoming reports while maintaining zero API expenditures on routine cl
                           +------------------------------------------+
                                      /         |         \
                                     /          |          \
-                 Confidence >= 0.90/           |           \ Confidence >= 0.75
+                 Confidence >= 0.90/           |           \ Confidence >= 0.70
             (Class: not_a_hazard) /            |            \ (Class: Hazard)
                                  /             |             \
                                 v              v              v
                      +---------------+  +--------------+  +--------------------+
                      |    REJECT     |  |   ESCALATE   |  |       ACCEPT       |
-                     | 0 Cloud Calls |  | Unambiguous  |  | Low Cost Text Call |
+                     | Client Banner |  | Unambiguous  |  | Low-Cost Text Call |
                      | S3 Auto-Purge |  | Edge Cases   |  | Derived Severity   |
                      +---------------+  +--------------+  +--------------------+
                                                |                    |
                                                v                    v
                                      +------------------+  +-------------------+
                                      |     TIER 3:      |  |      TIER 2:      |
-                                     | CLOUD MULTI-MODAL|  | TEXT-ONLY LLM     |
+                                     | CLOUD MULTIMODAL |  | TEXT GENERATION   |
                                      | Gemini 2.5 Flash |  | Groq Llama-3.1-8B |
+                                     | (Fallback: Qwen) |  | (Cerebras/Mistral)|
                                      +------------------+  +-------------------+
                                                |                    |
                                                +----------+---------+
@@ -389,289 +863,148 @@ To handle incoming reports while maintaining zero API expenditures on routine cl
                                               [Persist to DynamoDB]
 ```
 
-### 4.1 Tier 1: Local Edge / Client Inference
-* **Execution Environment:** In-browser WebAssembly via `onnxruntime-web`.
-* **Gate Logic:**
-  - **Rejection Rule:** If `label === "not_a_hazard"` and `confidence >= 0.90`, the report is rejected on-device or intercepted on backend ingestion. The photo is dropped, and no cloud vision LLMs are engaged.
-  - **Acceptance Rule:** If `label !== "not_a_hazard"` and `confidence >= 0.75`, the hazard is classified immediately. Severity is derived locally using deterministic engineering heuristics:
-    $$\text{Severity}_{\text{pothole}} = \begin{cases} 4 & \text{if } \text{confidence} > 0.90 \\ 3 & \text{otherwise} \end{cases}$$
-    $$\text{Severity}_{\text{garbage}} = \begin{cases} 3 & \text{if } \text{confidence} > 0.90 \\ 2 & \text{otherwise} \end{cases}$$
-  - **Escalation Rule:** If $0.75 > \text{confidence}$ or the model encounters high entropy, the request falls through to Tier 3.
+### 6.2 Threshold Definitions & Nuances
+The thresholds governing triage transitions operate across two distinct files in the codebase:
+1. **Client-Side Classifier (`lib/client-classifier.ts`):**
+   - `REJECT_THRESHOLD = 0.90`: If `not_a_hazard` reaches $\ge 0.90$, action is `"reject"`.
+   - `ACCEPT_THRESHOLD = 0.70`: If hazard class reaches $\ge 0.70$, action is `"accept"`.
+   - Severity Heuristic: Base severity is 3 (or 2 for `garbage_dump`). If confidence exceeds `0.85`, severity increments by $+1$ (clamped to $[1, 5]$).
+2. **Server-Side Route Gate (`app/api/report/route.ts`):**
+   - When serverless environments lack `onnxruntime-node` (due to binary pruning in `amplify.yml`), the backend verifies the forwarded client inference.
+   - It trusts client-side `"accept"` actions when `clientOnnxLabel` is valid and `clientOnnxConfidence >= 0.70`.
+   - If unhandled, it invokes `ai-router.analyzeCivicIssue(buffer, mimeType)`.
 
-### 4.2 Tier 2: Lightning Text Generation (Groq LLM)
-When Tier 1 accepts a hazard, generating a clear title and description does not require an expensive computer vision model. The backend passes the structured class, coordinates, and user comments to **Groq Cloud** running `llama-3.1-8b-instant`.
-* **Daily Quota:** **14,400 requests/day** (vs. 20 for Gemini Vision).
-* **Generation Latency:** 280 milliseconds.
-* **Resilient Provider Chain:** Groq $\rightarrow$ Cerebras $\rightarrow$ Mistral $\rightarrow$ Deterministic String Template.
-
-### 4.3 Tier 3: Multimodal Forensic Inspection (Gemini 2.5 Flash)
-Reserved strictly for ambiguous captures. Gemini analyzes pixel textures, ambient lighting, and anti-fraud cues via native structured outputs (`responseSchema: zodToGeminiSchema()`), ensuring strict JSON compliance.
+### 6.3 LLM Description & Synthesis Chain
+When Tier 1 accepts a hazard, generating titles and descriptions is offloaded to lightweight text models (`lib/describe.ts`):
+* **Primary Provider:** Groq Cloud running `llama-3.1-8b-instant`.
+* **Fallback Chain:** Groq $\rightarrow$ Cerebras (`llama3.1-8b`) $\rightarrow$ Mistral (`mistral-tiny`) $\rightarrow$ Deterministic string template.
+* **Ambiguous Cases (Tier 3):** `lib/ai-router.ts` queries Google Gemini 2.5 Flash with structured Zod outputs. If Gemini hits rate limits, it falls back to Groq running `qwen/qwen3.6-27b`.
 
 ---
 
-# 5. The 4-Stage Autonomous Forensic Verification Pipeline
+# 7. The 4-Stage Autonomous Forensic Verification Pipeline
 
 ```
 ========================================================================================
                           4-STAGE RESOLUTION VERIFICATION GATEWAY
 ========================================================================================
-Stage 1: Spatial Gating          Haversine Mathematical GPS Radius (< 50 Meters)
-Stage 2: Duplication Gating      Perceptual Hashing Hamming Distance (pHash > 5)
-Stage 3: Negative Edge Testing   YOLO11n-cls Verification (Original Hazard Absent)
-Stage 4: Visual Forensic Arbiter Gemini 2.5 Flash Multi-Image Comparative Analysis
+Stage 1: Spatial Gating          Haversine Mathematical GPS Radius (< 50 Meters) -> 403
+Stage 2: Duplication Gating      sharp-phash Perceptual Hash (Hamming > 5)       -> 403
+Stage 3: Negative Edge Testing   YOLO11n-cls Verification (Original Absent >=0.80)-> 400
+Stage 4: Visual Forensic Arbiter Groq GPT-OSS-120B / Qwen / Gemini Forensics    -> 403
 ========================================================================================
 ```
 
-To prevent citizens from gaming civic point rewards by submitting fraudulent repair photos, [`civic-guard/app/api/verify/route.ts`](file:///Users/pratyushraj/CivicGuard/civic-guard/app/api/verify/route.ts) enforces an autonomous verification pipeline:
-
-```mermaid
-sequenceDiagram
-    autonumber
-    actor Citizen
-    participant Client as Next.js Dashboard
-    participant API as /api/verify
-    participant S3 as Amazon S3
-    participant DDB as Amazon DynamoDB
-    participant Gemini as Gemini 2.5 Flash
-
-    Citizen->>Client: Uploads "Resolved Hazard" Photo
-    Client->>API: POST /api/verify (photo, report_id, GPS coords)
-    API->>DDB: Fetch original incident (lat, lng, image_url)
-    
-    Note over API: STAGE 1: Spatial Haversine Check
-    alt Distance > 50 meters
-        API-->>Client: 400 Bad Request ("Verifier is >50m from incident")
-    end
-
-    Note over API: STAGE 2: Perceptual Hash (pHash)
-    API->>S3: Fetch original image buffer
-    alt Hamming Distance <= 5
-        API-->>Client: 403 Forbidden ("Duplicate image detected")
-    end
-
-    Note over API: STAGE 3: Negative Classifier Check
-    alt Hazard still detected with confidence >= 0.80
-        API-->>Client: 400 Bad Request ("Hazard still detected in photo")
-    end
-
-    Note over API: STAGE 4: Multi-Modal Visual Forensics
-    API->>Gemini: Comparative Analysis (Image A original vs. Image B repair)
-    alt Gemini Verdict == "NO"
-        API-->>Client: 400 Bad Request (Gemini forensic justification)
-    else Gemini Verdict == "YES"
-        API->>DDB: Update report status = 'Resolved'
-        API->>DDB: Atomic Increment user points (+50)
-        API-->>Client: 200 OK ("Resolution Certified! +50 Points")
-    end
-```
-
-### Mathematical Formulations:
-
-#### 1. Haversine Spatial Distance (Stage 1)
+### 7.1 Stage 1: Spatial Gating (Haversine Formula)
 Given verifier coordinates $(\phi_1, \lambda_1)$ and original incident coordinates $(\phi_2, \lambda_2)$:
 $$\Delta\phi = \phi_2 - \phi_1, \quad \Delta\lambda = \lambda_2 - \lambda_1$$
 $$a = \sin^2\left(\frac{\Delta\phi}{2}\right) + \cos(\phi_1)\cos(\phi_2)\sin^2\left(\frac{\Delta\lambda}{2}\right)$$
 $$d = 2 R \cdot \text{atan2}\left(\sqrt{a}, \sqrt{1-a}\right)$$
-Where $R = 6,371,000 \text{ meters}$. If $d > 50\text{m}$, the request is rejected immediately.
+Where $R = 6,371,000 \text{ meters}$. If $d > 50\text{ m}$, the request is rejected with **HTTP 403** and the calculated distance is returned in the response payload.
 
-#### 2. Discrete Cosine Transform Perceptual Hashing (Stage 2)
-To detect duplicate submissions or re-uploads of the damaged site:
-1. The image is reduced to $32 \times 32$ greyscale pixels.
-2. A 2D Discrete Cosine Transform (DCT) computes structural frequency components.
-3. The top $8 \times 8$ lowest frequencies are isolated, and a 64-bit fingerprint is computed by comparing each frequency against the median.
-4. **Hamming Distance Guard:**
-   $$D_H(h_1, h_2) = \sum_{i=1}^{64} (h_{1,i} \oplus h_{2,i})$$
-   If $D_H \le 5$, the photo is rejected as a duplicate re-upload of the un-repaired hazard.
+### 7.2 Stage 2: Duplication Gating (`sharp-phash`)
+To prevent users from uploading the original hazard photograph as proof of resolution:
+1. The original image buffer and the verification image buffer are processed via `sharp-phash`.
+2. Perceptual fingerprints are compared using `sharp-phash/distance`.
+3. If Hamming distance $D_H \le 5$, the photo is rejected with **HTTP 403** as a duplicate submission.
+
+### 7.3 Stage 3: Negative Edge Testing (Classifier Check)
+The verification image is evaluated via `classify()`:
+* If the predicted label matches the original report category and confidence is $\ge 0.80$, the request is rejected with **HTTP 400** ("Hazard still detected in photo").
+
+### 7.4 Stage 4: Multi-Modal Visual Forensics (Comparative Arbiter)
+If the image passes Stages 1–3, `verifyRepairCompletion()` in `lib/ai-router.ts` evaluates both images side-by-side:
+* **Execution Sequence:** Tries Groq (`openai/gpt-oss-120b`) $\rightarrow$ Groq (`qwen/qwen3.6-27b`) $\rightarrow$ Google Gemini 2.5 Flash.
+* **Evaluation Criteria:**
+  1. *Location Match (`is_same_location`):* Assesses permanent architectural structures, road seams, and curbs, ignoring moving objects (parked cars, pedestrians).
+  2. *Resolution Confirmation (`is_resolved`):* Checks for visual evidence of repair (fresh asphalt, cleared debris, resolved drainage).
+* If certified (`YES`), the report is updated to `Resolved` in DynamoDB and $+50$ points are awarded. If rejected (`NO`), HTTP 403 is returned with the model's forensic justification.
 
 ---
 
-# 6. Offline-First Resilience & Distributed Sync Engine
+# 8. Offline-First Resilience & Distributed Sync Engine
 
-Citizens often photograph infrastructure defects in connectivity dead zones, rural access roads, or during severe weather conditions when cellular infrastructure is compromised. 
-
-### 6.1 IndexedDB Storage Subsystem
-* **Library:** `localforage`
-* **Schema Definition:** [`civic-guard/lib/offline-types.ts`](file:///Users/pratyushraj/CivicGuard/civic-guard/lib/offline-types.ts)
-* **Payload Structure:**
+### 8.1 IndexedDB Storage Architecture
+In cellular dead zones, submissions are serialized into IndexedDB via `localforage`:
+* **Key Prefix:** `report_${UUID}`
+* **Payload Interface:**
   ```typescript
   export interface OfflineReportPayload {
-    id: string;             // Client crypto UUID
-    imageBase64: string;    // Base64 serialized buffer
-    imageMimeType: string;  // MIME type
-    imageFileName: string;  // File metadata
-    latitude: number;       // Hardware GPS latitude
-    longitude: number;      // Hardware GPS longitude
+    id: string;
+    imageBase64: string;
+    imageMimeType: string;
+    imageFileName: string;
+    latitude: number;
+    longitude: number;
     sync_status: 'pending' | 'synced' | 'failed';
-    created_at: string;     // ISO 8601 timestamp
-    retryCount?: number;    // Retry backoff accumulator
-    lastError?: string;     // Detailed failure error
+    created_at: string;
+    retryCount?: number;
+    lastError?: string;
   }
   ```
 
-### 6.2 The Auto-Replay & Self-Healing Loop
-Implemented in [`civic-guard/hooks/useBackgroundSync.ts`](file:///Users/pratyushraj/CivicGuard/civic-guard/hooks/useBackgroundSync.ts):
-1. **Network Reconnection Interceptor:** Binds to `window.addEventListener("online")`.
-2. **Sequential Replay Queue:** Iterates through stored IndexedDB records, requesting S3 presigned URLs, streaming the reconstructed binary payload to S3, and calling `/api/report`.
-3. **Deadlock Elimination (The 30-Minute Infinite Loop Fix):**
-   - *Previous Defect:* If a report was rejected by AI triage (`400 Bad Request`) or lacked authorization (`401`), it remained trapped in IndexedDB, triggering an infinite sync loop.
-   - *Production Fix:* HTTP 400 responses (AI fraud rejection) immediately evict the record from IndexedDB and display an informative toast. HTTP 401 pauses the queue until authentication is restored. A strict 5-attempt retry limit permanently evicts unrecoverable payloads.
+### 8.2 Lifecycle Management & Eviction Rules
+The background sync hook (`hooks/useBackgroundSync.ts`) implements deterministic recovery behavior:
+* **Automatic Reconnection:** Binds to `window.addEventListener("online")`.
+* **HTTP 400 Eviction:** If the report fails AI triage upon sync, it is immediately evicted from IndexedDB with an informative toast notification, preventing infinite retry loops.
+* **HTTP 401 Authentication Pause:** If unauthenticated, the sync loop pauses without discarding records, allowing the user to sign in before re-attempting sync.
+* **Retry Bounds:** Transient network failures increment `retryCount`; records are evicted if retries exceed 5. Manual "Flush Queue" and "Clear Queue" actions are also provided in the UI.
 
 ---
 
-# 7. Comprehensive AWS Serverless Cloud Architecture
+# 9. Comprehensive AWS Serverless Cloud Architecture
 
-CivicGuard is constructed entirely on **Amazon Web Services (AWS)** serverless infrastructure in the **Asia Pacific (Mumbai) `ap-south-1`** region:
-
-```mermaid
-flowchart LR
-    subgraph Edge ["Global CloudFront Edge"]
-        DNS["Route 53 / Custom Domain"]
-        CDN["Amazon CloudFront (AWS Amplify Managed)"]
-    end
-
-    subgraph Compute ["Serverless Application Compute"]
-        SSR["AWS Amplify SSR Engine\n(Next.js 16 Node.js 20 Lambda)"]
-    end
-
-    subgraph Identity ["Identity & Access Management"]
-        CognitoPool["AWS Cognito User Pool\n[ap-south-1_QOD15h5ZS]"]
-        CognitoDomain["Cognito Auth Domain\n[civicguard-auth-8958...]"]
-    end
-
-    subgraph Storage ["Cloud Persistence"]
-        S3["Amazon S3 Storage\n[civicpulse-hazard-uploads]"]
-        DDB_Reports[("DynamoDB Table\nCivicPulseReports")]
-        DDB_Profiles[("DynamoDB Table\nCivicPulseProfiles")]
-    end
-
-    DNS --> CDN
-    CDN --> SSR
-    SSR <--> CognitoPool
-    SSR <--> S3
-    SSR <--> DDB_Reports
-    SSR <--> DDB_Profiles
-```
-
-### 7.1 Global Topography & Infrastructure Topology
-* **AWS Region:** `ap-south-1` (Mumbai, India) — chosen for low-latency (<40ms) citizen access across Indian metropolitan municipal zones.
-* **Architecture Pattern:** Jamstack / Serverless Compute with direct-to-S3 media offloading and NoSQL single-digit millisecond data access.
-
-### 7.2 AWS Amplify Hosting (Next.js 16 SSR Compute Engine)
-* **App Root:** `civic-guard`
+### 9.1 AWS Amplify Hosting (Next.js 16 SSR Compute)
+* **Application Root:** `civic-guard`
 * **Amplify App ID:** `d3h94wzgibv55q`
-* **Custom Build Specification:** [`amplify.yml`](file:///Users/pratyushraj/CivicGuard/amplify.yml)
-* **Compute Optimization Strategy:**
-  - AWS Amplify serverless SSR compute bundles enforce a **strict 220 MB limit** (`230,686,720 bytes`).
-  - Native machine-learning runtimes (`onnxruntime-node`) contain multi-platform C++ shared objects (`.so`, `.dylib`, `.dll`) exceeding 280 MB.
-  - CivicGuard addresses this by:
-    1. Offloading edge inference to client browsers via `onnxruntime-web` WebAssembly.
-    2. Enforcing automated post-build pruning in `amplify.yml`:
-       ```yaml
-       build:
-         commands:
-           - env | grep -E '^(NEXT_PUBLIC_|APP_AWS_|AWS_|GEMINI_|GROQ_|DYNAMODB_)' > .env.production || true
-           - npm run build
-           - rm -rf .next/cache .next/standalone
-           - rm -rf node_modules/onnxruntime-node node_modules/typescript node_modules/@types node_modules/@next/swc*
-       ```
-    3. Reducing deployment archive size from **370 MB down to 42 MB**, ensuring lightning-fast lambda deployments and sub-second cold starts.
+* **Target Region:** `ap-south-1` (Mumbai)
+* **Bundle Optimization:** Amplify serverless SSR compute bundles enforce a **220 MB limit**. Native C++ packages like `onnxruntime-node` (configured as a devDependency) exceed this ceiling. CivicGuard prunes `.next/cache`, `node_modules/onnxruntime-node`, and related dev packages in `amplify.yml`, reducing the SSR deployment artifact to approximately **42 MB**.
 
-### 7.3 AWS Cognito User Pools & Google OAuth 2.0 Identity Federation
+### 9.2 AWS Cognito User Pools & Google OAuth 2.0 Federation
 * **User Pool ID:** `ap-south-1_QOD15h5ZS`
 * **App Client ID:** `5367n3jeafigqt9k3u2ifc01jd`
-* **Cognito Domain:** `civicguard-auth-8958.auth.ap-south-1.amazoncognito.com`
-* **Federated Provider:** Google Identity Provider (Client ID: `256807335868-6l8kje8rlhsv1h1fhu88is2ltunb86gs...`)
-* **OAuth Flows Allowed:** Authorization Code Grant (`code`) with `email`, `openid`, and `profile` scopes.
-* **Token Exchange & Security Architecture:**
-  - The client redirects directly to Cognito’s OAuth endpoint: `https://civicguard-auth-8958.auth.ap-south-1.amazoncognito.com/oauth2/authorize?identity_provider=Google...`
-  - Cognito federates authentication with Google, verifies consent, and redirects back to `/dashboard?code=...`.
-  - Next.js backend endpoint [`/api/auth/token`](file:///Users/pratyushraj/CivicGuard/civic-guard/app/api/auth/token/route.ts) performs a server-to-server token exchange with Cognito (`/oauth2/token`).
-  - The backend issues a signed, encrypted **`HttpOnly; SameSite=Lax; Secure` session cookie (`cognito_id_token`)**, preventing Cross-Site Scripting (XSS) token exfiltration.
+* **Auth Domain:** `civicguard-auth-8958.auth.ap-south-1.amazoncognito.com`
+* **Identity Provider:** Google Identity Provider
+* **Session Management:** The token exchange route (`/api/auth/token`) issues two cookies:
+  - `cognito_id_token`: `HttpOnly; SameSite=Lax; Secure` for API authentication.
+  - `cognito_user_id`: Standard cookie enabling client-side user identification.
+* **Logout (`/api/auth/logout`):** Clears authentication session cookies.
 
-### 7.4 Amazon DynamoDB (NoSQL Data Architecture)
+### 9.3 Amazon DynamoDB Architecture
 * **Table 1: `CivicPulseReports`**
-  - **Partition Key:** `id` (String UUID)
-  - **Billing Mode:** Pay-Per-Request (On-Demand Capacity)
-  - **Storage:** Stores geospatial coordinates, S3 image URIs, AI classification metadata, severity scores, and resolution timestamps.
+  - *Partition Key (PK):* `id` (String UUID)
+  - *Billing Mode:* Pay-Per-Request (On-Demand)
+  - *Attributes:* `title`, `description`, `category`, `severity_score`, `latitude`, `longitude`, `image_url`, `status`, `user_id`, `created_at`, `resolved_image_url`, `resolved_at`.
 * **Table 2: `CivicPulseProfiles`**
-  - **Partition Key:** `id` (String Cognito `sub`)
-  - **Billing Mode:** Pay-Per-Request (On-Demand Capacity)
-  - **Storage:** Citizen profiles, authenticated email mappings, and gamification points.
-  - **Atomic Counter Expressions:** Safe incrementation and decrementation of citizen civic points without race conditions:
-    ```typescript
-    UpdateExpression: "ADD points :pts"
-    ```
+  - *Partition Key (PK):* `id` (String Cognito `sub`)
+  - *Billing Mode:* Pay-Per-Request (On-Demand)
+  - *Attributes:* `email`, `name`, `points`, `created_at`.
+  - *Atomic Points Counter:* Updates use `ADD points :pts` (+10 for report, +50 for verification). Deletions query current balance and deduct $\min(10, \text{currentPoints})$.
 
-### 7.5 Amazon S3 & Presigned Ingestion
+### 9.4 Amazon S3 Bucket & Access Controls
 * **Bucket:** `civicpulse-hazard-uploads`
 * **Region:** `ap-south-1`
-* **Security & Access Control:**
-  - Bucket prevents public unauthenticated PUT operations.
-  - All media ingestion is gated through 60-second presigned PUT URLs generated by `@aws-sdk/s3-request-presigner`.
-  - Cross-Origin Resource Sharing (CORS) is configured to permit PUT operations exclusively from `https://main.d3h94wzgibv55q.amplifyapp.com` and `http://localhost:3000`.
+* **Ingestion:** Direct PUT via 60-second presigned URLs generated by `@aws-sdk/s3-request-presigner`.
+* **Automated Cleanup:** Rejected reports trigger an immediate `DeleteObjectCommand` on S3, preventing orphaned storage accumulation.
+
+### 9.5 AWS IAM Scoping & Security Perimeter
+IAM credentials (`APP_AWS_ACCESS_KEY_ID`, `APP_AWS_SECRET_ACCESS_KEY`) are scoped strictly to least-privilege operations:
+* `s3:PutObject`, `s3:GetObject`, `s3:DeleteObject` on `arn:aws:s3:::civicpulse-hazard-uploads/*`
+* `dynamodb:PutItem`, `dynamodb:GetItem`, `dynamodb:UpdateItem`, `dynamodb:DeleteItem`, `dynamodb:Scan` on `arn:aws:dynamodb:ap-south-1:*:table/CivicPulse*`
 
 ---
 
-# 8. Database Engineering: DynamoDB Schema & Access Patterns
+# 10. Geospatial GIS Engine & UI Design System
 
-### 8.1 Data Modeling Specification
+### 10.1 Leaflet GIS Integration with Esri ArcGIS Dark Gray Base
+* **File:** `civic-guard/components/LeafletMap.tsx`
+* **Tile Provider Migration:** CartoDB CDN tiles (`cartocdn.com`) are frequently blocked by privacy tools and Brave Shields (`ERR_BLOCKED_BY_CLIENT`). CivicGuard integrates **Esri ArcGIS Dark Gray Base**:
+  ```
+  https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}
+  ```
+* **GIS Features:** Marker clustering (`leaflet.markercluster`), dynamic heatmaps (`leaflet.heat`), tour mode automated fly-tos, and time-lapse replay scrubbing across incident submission timestamps.
 
-```
-                                  +------------------------------------+
-                                  |         CivicPulseReports          |
-                                  +------------------------------------+
-                                  | id (PK)                : String    |
-                                  | title                  : String    |
-                                  | description            : String    |
-                                  | category               : String    |
-                                  | severity_score         : Number    |
-                                  | latitude               : Number    |
-                                  | longitude              : Number    |
-                                  | image_url              : String    |
-                                  | status                 : String    |
-                                  | user_id                : String    |
-                                  | created_at             : String    |
-                                  | resolved_image_url     : String    |
-                                  | resolved_at            : String    |
-                                  +------------------------------------+
-                                                    ^
-                                                    | (Linked via user_id -> sub)
-                                                    v
-                                  +------------------------------------+
-                                  |         CivicPulseProfiles         |
-                                  +------------------------------------+
-                                  | id (PK)                : String    |
-                                  | email                  : String    |
-                                  | name                   : String    |
-                                  | points                 : Number    |
-                                  | created_at             : String    |
-                                  +------------------------------------+
-```
-
-### 8.2 Primary Access Patterns & Execution Implementation
-1. **Fetch Live Incident Feed / Map Markers:**
-   - *Target:* `CivicPulseReports`
-   - *Operation:* `ScanCommand` with client-side sorting on `created_at DESC`.
-   - *Latency:* ~12 ms.
-2. **Submit Verified Incident:**
-   - *Target:* `CivicPulseReports`
-   - *Operation:* `PutCommand` with server-generated cryptographic UUID.
-   - *Latency:* ~8 ms.
-3. **Atomic Civic Reward Granting:**
-   - *Target:* `CivicPulseProfiles`
-   - *Operation:* `UpdateCommand` with `ExpressionAttributeValues: { ":pts": 10 }` or `{ ":pts": 50 }`.
-   - *Latency:* ~6 ms.
-4. **Delete Incident by Owner:**
-   - *Target:* `CivicPulseReports` + `CivicPulseProfiles`
-   - *Operation:* Verifies Cognito `sub` ownership, executes `DeleteCommand` on report, and applies an atomic decrement on citizen points.
-
----
-
-# 9. UI/UX Engineering, Design Tokens & Geospatial Visualization
-
-### 9.1 The "CivicPulse" Cyber-Dark Design System
-CivicGuard employs an enterprise cyber-dark aesthetic designed for field readability under bright sunlight while preserving battery life on OLED mobile screens:
-
+### 10.2 Cyber-Dark Design Tokens & Visual Hierarchy
 ```css
 /* Core Design Tokens */
 :root {
@@ -681,28 +1014,19 @@ CivicGuard employs an enterprise cyber-dark aesthetic designed for field readabi
   --bg-card-hover:  #242840;  /* Card Active State */
 
   --text-primary:   #e8eaf0;  /* High-Contrast White */
-  --text-muted:     #7a8199;  /* Secondary Legend Text */
+  --text-muted:     #7a8199;  /* Secondary Text */
   --text-dim:       #4a5068;  /* Subtle Accents */
 
-  --color-critical: #f43f5e;  /* Severity 5 (Rose 500) */
+  --color-critical: #ef4444;  /* Severity >= 4 (Red 500) */
   --color-medium:   #f59e0b;  /* Severity 3 (Amber 500) */
-  --color-low:      #2dd4bf;  /* Severity 1 (Teal 400) */
+  --color-low:      #06b6d4;  /* Severity <= 2 (Cyan 500) */
   --color-resolved: #10b981;  /* Resolution Green (Emerald 500) */
-  --color-accent:   #06b6d4;  /* Cyan Brand Glow */
 }
 ```
 
-### 9.2 Resilient Geospatial GIS Engine (Leaflet + ArcGIS Dark Gray)
-* **File:** [`civic-guard/components/LeafletMap.tsx`](file:///Users/pratyushraj/CivicGuard/civic-guard/components/LeafletMap.tsx)
-* **The AdBlock / Brave Shields Resolution:**
-  - *Symptom:* Default dark maps failed to load in privacy browsers (Brave, uBlock Origin), throwing `ERR_BLOCKED_BY_CLIENT` while Satellite view rendered normally.
-  - *Root Cause:* Open-source CartoDB tiles (`basemaps.cartocdn.com`) are flagged on privacy tracker blocking lists because the root domain also serves tracking scripts.
-  - *Fix:* Replaced tile provider with enterprise **Esri ArcGIS Dark Gray Base** (`https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}`).
-  - *Result:* 100% tile delivery across all ad-blockers and privacy shields with seamless retina scaling (`maxNativeZoom: 16`).
-
 ---
 
-# 10. Cost, Latency, and Scalability Analysis
+# 11. Performance, Latency & Economic Cost Analysis
 
 ```
 +---------------------------------------------------------------------------------------+
@@ -720,104 +1044,33 @@ CivicGuard employs an enterprise cyber-dark aesthetic designed for field readabi
 +--------------------------+------------------------------+-----------------------------+
 ```
 
-### 10.1 Latency Benchmarking (P95 Response Times)
-* **Edge On-Device Classification:** 42 ms (instant feedback in UI).
-* **Presigned Upload URL Generation:** 85 ms.
-* **S3 Direct Binary Streaming:** 240 ms (for a 3.5 MB photo on 4G LTE).
-* **DynamoDB Write Operations:** 8 ms.
-* **Full End-to-End Incident Pipeline:** 375 ms (compared to 3,200 ms for cloud vision pipelines).
+### Measured Response Latency:
+* **Edge On-Device Inference:** $38\text{ ms} - 52\text{ ms}$ (Apple Silicon), $\sim 65\text{ ms}$ (Mobile Chrome).
+* **Presigned Upload URL Issuance:** $85\text{ ms}$.
+* **S3 Direct Binary Streaming:** $240\text{ ms}$ (3 MB file on 4G network).
+* **DynamoDB PutCommand:** Single-digit millisecond latency ($\sim 8\text{ ms}$).
+* **Total User-Perceived Ingestion Time:** $\sim 375\text{ ms}$.
 
 ---
 
-# 11. Visual Evidence & Screenshot Manifest
-
-> **Note for Report Evaluators:** The following visual exhibits represent live execution verification across both the citizen client interface and the AWS Cloud Management Console.
-
-```
-+---------------------------------------------------------------------------------------+
-|                               EXHIBIT 1: CITIZEN DASHBOARD                            |
-|                                                                                       |
-|   [ PLACEHOLDER: Full-screen screenshot of CivicGuard Dashboard ]                    |
-|   - URL: https://main.d3h94wzgibv55q.amplifyapp.com/dashboard                         |
-|   - Showing: Live incident cards, Esri ArcGIS Dark Map, Severity Badges,             |
-|              and User Civic Points Counter in Top Navigation                          |
-+---------------------------------------------------------------------------------------+
-```
-
-```
-+---------------------------------------------------------------------------------------+
-|                               EXHIBIT 2: EDGE AI IN-BROWSER TRIAGE                    |
-|                                                                                       |
-|   [ PLACEHOLDER: Image of Report Upload Modal with Live AI Feedback ]                 |
-|   - Showing: Uploaded pothole photo with live green badge:                            |
-|              "On-Device AI: Pothole (94% match) • Severity: Medium"                   |
-|   - Verification: civic_int8.onnx executing client-side via onnxruntime-web          |
-+---------------------------------------------------------------------------------------+
-```
-
-```
-+---------------------------------------------------------------------------------------+
-|                               EXHIBIT 3: AWS COGNITO USER POOL                        |
-|                                                                                       |
-|   [ PLACEHOLDER: AWS Management Console -> Cognito -> User Pools ]                   |
-|   - User Pool ID: ap-south-1_QOD15h5ZS                                                |
-|   - Name: CivicGuardUserPool                                                          |
-|   - Identity Providers: Google (Federated Enabled)                                    |
-|   - App Client: CivicGuardWebClient (ID: 5367n3jeafigqt9k3u2ifc01jd)                 |
-+---------------------------------------------------------------------------------------+
-```
-
-```
-+---------------------------------------------------------------------------------------+
-|                               EXHIBIT 4: AMAZON DYNAMODB TABLES                       |
-|                                                                                       |
-|   [ PLACEHOLDER: AWS Management Console -> DynamoDB -> Tables ]                       |
-|   - Showing Tables: 'CivicPulseReports' and 'CivicPulseProfiles'                      |
-|   - Region: ap-south-1 (Mumbai)                                                       |
-|   - Billing Mode: PAY_PER_REQUEST (On-Demand)                                         |
-|   - Item Explorer: Displaying populated incident records and GPS coordinates          |
-+---------------------------------------------------------------------------------------+
-```
-
-```
-+---------------------------------------------------------------------------------------+
-|                               EXHIBIT 5: AMAZON S3 BUCKET METRICS                     |
-|                                                                                       |
-|   [ PLACEHOLDER: AWS Management Console -> S3 -> Buckets ]                            |
-|   - Bucket: civicpulse-hazard-uploads                                                 |
-|   - Showing: hazards/ folder structure and CORS configuration JSON                    |
-+---------------------------------------------------------------------------------------+
-```
-
-```
-+---------------------------------------------------------------------------------------+
-|                               EXHIBIT 6: AWS AMPLIFY HOSTING PIPELINE                 |
-|                                                                                       |
-|   [ PLACEHOLDER: AWS Amplify Console -> App: AWS-project (main) ]                     |
-|   - Status: Build & Deployment Succeeded (Green Checkmark)                            |
-|   - Branch: main (Connected to GitHub: Pratyush017/AWS-project)                       |
-|   - Build Spec: amplify.yml (Pruning onnxruntime-node to fit 220MB limit)             |
-+---------------------------------------------------------------------------------------+
-```
-
----
-
-# 12. Future Roadmap & Municipal Integrations
+# 12. Future Roadmap & Conclusions
 
 1. **Automated Municipal Work-Order Webhooks:** Direct JSON payload dispatch into existing municipal CRM systems (e.g., SAP Public Services, Open311 APIs).
 2. **Citizen Incentive Redemption:** Partnering with regional transit agencies to convert verified Civic Points into public bus/metro transit credits.
 3. **Automated Drone Inspection Ingestion:** Expanding S3 presigned ingestion to accept geotagged orthomosaic video feeds captured by municipal inspection drones.
 4. **Edge Quantization Upgrade (INT4):** Exploring 4-bit weight quantization to reduce the neural model footprint down to **0.9 MB** for ultra-low-bandwidth smart city deployments.
 
+CivicGuard proves that autonomous, edge-first artificial intelligence combined with 100% serverless cloud architectures can effectively resolve the municipal coordination deficit—providing rapid response times, strong fraud resistance, and near-zero ongoing inference expenses.
+
 ---
 
-# 13. Appendix: Environmental Variables, API Specs & Code Manifest
+# 13. Appendix: Environment Variables & REST API Manifest
 
 ### 13.1 Production Environment Configuration (`.env.production`)
 ```env
 # AWS IAM Credentials (Scoped strictly to S3, DynamoDB, and Cognito)
 APP_AWS_REGION=ap-south-1
-APP_AWS_ACCESS_KEY_ID=AKIA****************    # Redacted production IAM access key
+APP_AWS_ACCESS_KEY_ID=AKIA****************        # Redacted production IAM access key
 APP_AWS_SECRET_ACCESS_KEY=**************************************** # Redacted production IAM secret
 
 # Amazon S3 Media Bucket
@@ -834,26 +1087,26 @@ DYNAMODB_REPORTS_TABLE=CivicPulseReports
 DYNAMODB_PROFILES_TABLE=CivicPulseProfiles
 
 # Cloud AI Fallback & Text Engines
-GEMINI_API_KEY=AIzaSy***********************************    # Redacted Google Gemini 2.5 Flash API key
-GROQ_API_KEY=gsk_************************************************    # Redacted Groq Llama-3.3-70B API key
+GEMINI_API_KEY=AIzaSy***********************************        # Redacted Gemini API key
+GROQ_API_KEY=gsk_************************************************    # Redacted Groq API key
 ```
 
 ### 13.2 Core REST Endpoints Manifest
 * `POST /api/upload`: Validates MIME types, issues 60-second S3 presigned PUT URLs.
 * `POST /api/report`: Ingests report metadata, evaluates edge/cloud AI triage, persists to DynamoDB `CivicPulseReports`, atomically grants +10 civic points.
 * `GET  /api/reports`: Queries DynamoDB for all incidents, orders by timestamp descending.
-* `DELETE /api/report/[id]`: Verifies Cognito `sub` ownership, purges report, atomically decrements civic points.
-* `POST /api/verify`: Executes 4-stage forensic resolution pipeline (Haversine $\rightarrow$ pHash $\rightarrow$ Negative Classifier $\rightarrow$ Gemini Forensics), marks status as `Resolved`, atomically grants +50 civic points.
-* `GET  /api/insights`: Cached hourly municipal health trend synthesizer backed by Groq LLM analytics.
-* `POST /api/auth/token`: Exchanges Cognito authorization codes for JWT tokens, issues secure HTTP-only cookies.
+* `DELETE /api/report/[id]`: Verifies Cognito `sub` ownership, purges report from DynamoDB, safely decrements points up to 10.
+* `POST /api/verify`: Executes 4-stage forensic resolution pipeline (Haversine $\rightarrow$ pHash $\rightarrow$ Negative Classifier $\rightarrow$ Multimodal Forensics), marks status as `Resolved`, atomically grants +50 civic points.
+* `GET  /api/insights`: Cached hourly municipal health trend synthesizer backed by Groq LLM analytics (`revalidate = 3600` ISR).
+* `POST /api/auth/token`: Exchanges Cognito authorization codes for JWT tokens, issues secure HTTP-only cookies (`cognito_id_token` and `cognito_user_id`).
 * `GET  /api/auth/me`: Resolves active Cognito user identity and DynamoDB civic profile points.
-* `POST /api/auth/logout`: Clears authentication session cookies and invalidates Cognito sessions.
+* `POST /api/auth/logout`: Clears authentication session cookies (`cognito_id_token` and `cognito_user_id`).
 
 ---
 
 ```
 ========================================================================================
                           END OF TECHNICAL SPECIFICATION REPORT
-                            CIVICGUARD / CIVICPULSE PLATFORM
+                             CIVICGUARD / CIVICPULSE PLATFORM
 ========================================================================================
 ```
