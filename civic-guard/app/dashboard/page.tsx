@@ -1291,14 +1291,24 @@ export default function DashboardPage() {
                                   /* eslint-disable-next-line @next/next/no-img-element */
                                   <img
                                     src={report.image_url}
-                                    className="w-14 h-14 rounded-xl object-cover flex-shrink-0 border border-white/5"
+                                    className="w-14 h-14 rounded-xl object-cover flex-shrink-0 border border-white/5 bg-slate-900"
                                     alt={report.title}
+                                    onError={(e) => {
+                                      // Gracefully fall back if an image fails to load
+                                      const target = e.currentTarget;
+                                      target.style.display = "none";
+                                      if (target.nextElementSibling) {
+                                        (target.nextElementSibling as HTMLElement).style.display = "flex";
+                                      }
+                                    }}
                                   />
-                                ) : (
-                                  <div className="w-14 h-14 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center flex-shrink-0">
-                                    <MapPin className="size-5 text-slate-600" />
-                                  </div>
-                                )}
+                                ) : null}
+                                <div
+                                  className="w-14 h-14 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center flex-shrink-0"
+                                  style={{ display: report.image_url ? "none" : "flex" }}
+                                >
+                                  <MapPin className="size-5 text-slate-600" />
+                                </div>
                                 <div className="min-w-0 flex-1">
                                   <div className="flex items-start justify-between gap-1">
                                     <p className="font-display font-semibold text-[13.5px] text-[#e8eaf0] leading-snug group-hover:text-teal-300 transition-colors line-clamp-1">

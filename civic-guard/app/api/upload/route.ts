@@ -21,7 +21,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const key = `hazards/${Date.now()}-${filename}`;
+    const sanitizedFilename = encodeURIComponent(filename.replace(/\s+/g, "_"));
+    const key = `hazards/${Date.now()}-${sanitizedFilename}`;
 
     const command = new PutObjectCommand({
       Bucket: process.env.NEXT_PUBLIC_S3_BUCKET_NAME!,
